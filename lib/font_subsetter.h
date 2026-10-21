@@ -85,10 +85,20 @@ class FontSubsetter {
     AString subfont_path;
   };
 
+  struct FontCheckInfo {
+    AssParser::FontDesc font_desc;
+    size_t num_chars = 0;
+    bool is_found = false;
+    FontPath font_path;
+    std::vector<uint32_t> missing_codepoints;
+  };
+
   FontSubsetter(const FontSubsetter&) = delete;
   FontSubsetter& operator=(const FontSubsetter&) = delete;
 
   void SetSubfontDir(const AString& subfont_dir);
+
+  std::vector<FontCheckInfo> Check();
 
   bool Run(const bool is_no_subset, const bool is_rename = false);
 
@@ -113,6 +123,10 @@ class FontSubsetter {
   bool set_subfonts_info();
 
   bool CreateSubfont(FontSubsetInfo& subset_font, const bool is_rename);
+
+  bool GetMissingCodepoints(const AString& font_path, const long& font_index,
+                            const std::unordered_set<char32_t>& codepoint_set,
+                            std::vector<uint32_t>& missing_codepoints);
 
   bool CheckGlyph(const AString& font_path, const long& font_index,
                   const std::unordered_set<char32_t>& codepoint_set,

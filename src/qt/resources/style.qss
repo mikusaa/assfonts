@@ -1,8 +1,0 @@
-* {
-	font-size: 14px;
-}
-
-QCheckBox::indicator {
-	width: 18px;
-	height: 18px;
-}

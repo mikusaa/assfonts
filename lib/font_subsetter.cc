@@ -118,6 +118,27 @@ bool FontSubsetter::Run(const bool is_no_subset, const bool is_rename) {
   return true;
 }
 
+std::vector<FontSubsetter::FontCheckInfo> FontSubsetter::Check() {
+  std::vector<FontCheckInfo> check_infos;
+  for (const auto& font_set : font_sets_) {
+    FontCheckInfo check_info;
+    check_info.font_desc = font_set.first;
+    check_info.num_chars = font_set.second.size();
+    check_info.is_found =
+        FindFont(font_set, fp_.font_list_, check_info.font_path.path,
+                 check_info.font_path.index) ||
+        FindFont(font_set, fp_.font_list_in_db_, check_info.font_path.path,
+                 check_info.font_path.index);
+    if (check_info.is_found) {
+      GetMissingCodepoints(check_info.font_path.path,
+                           check_info.font_path.index, font_set.second,
+                           check_info.missing_codepoints);
+    }
+    check_infos.emplace_back(check_info);
+  }
+  return check_infos;
+}
+
 std::vector<FontSubsetter::FontSubsetInfo> FontSubsetter::get_subfonts_info()
     const {
   return subfonts_info_;
@@ -394,6 +415,22 @@ bool FontSubsetter::CheckGlyph(
     const std::unordered_set<char32_t>& codepoint_set, const AString& fontname,
     int bold, int italic) {
   std::vector<uint32_t> missing_codepoints;
+  if (!GetMissingCodepoints(font_path, font_index, codepoint_set,
+                            missing_codepoints)) {
+    return false;
+  }
+  if (!missing_codepoints.empty()) {
+    logger_->Warn(_ST("Missing codepoints for \"{}\" ({},{}): {:#06x}"),
+                  fontname, bold, italic,
+                  fmt::join(missing_codepoints, _ST("  ")));
+  }
+  return true;
+}
+
+bool FontSubsetter::GetMissingCodepoints(
+    const AString& font_path, const long& font_index,
+    const std::unordered_set<char32_t>& codepoint_set,
+    std::vector<uint32_t>& missing_codepoints) {
   FT_Face ft_face;
   std::ifstream is(font_path, std::ios::binary);
   if (!is.is_open()) {
@@ -413,12 +450,8 @@ bool FontSubsetter::CheckGlyph(
       missing_codepoints.emplace_back(codepoint);
     }
   }
-  if (!missing_codepoints.empty()) {
-    logger_->Warn(_ST("Missing codepoints for \"{}\" ({},{}): {:#06x}"),
-                  fontname, bold, italic,
-                  fmt::join(missing_codepoints, _ST("  ")));
-  }
   FT_Done_Face(ft_face);
+  std::sort(missing_codepoints.begin(), missing_codepoints.end());
   return true;
 }
 

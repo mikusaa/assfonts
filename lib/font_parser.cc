@@ -19,6 +19,7 @@
 
 #include "font_parser.h"
 
+#include <algorithm>
 #include <exception>
 #include <fstream>
 #include <future>
@@ -109,6 +110,17 @@ static std::vector<AString> DEFAULT_FONT_PATHS = []() {
     paths.emplace_back(path.native());
   }
 
+  // Fonts installed "for the current user only" live here since Windows 10.
+  TCHAR sz_local_path[MAX_PATH];
+  if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, 0,
+                                sz_local_path))) {
+    auto user_path =
+        fs::path(sz_local_path) / "Microsoft" / "Windows" / "Fonts";
+    if (fs::is_directory(user_path)) {
+      paths.emplace_back(user_path.native());
+    }
+  }
+
 #endif
 
   return paths;
@@ -128,6 +140,12 @@ void FontParser::LoadFonts(std::vector<AString> fonts_dirs, bool with_default) {
     logger_->Info(_ST("Found {} font files in \"{}\". Parsing font files."),
                   fonts_path.size(), dir);
   }
+
+  // Overlapping folders (e.g. a parent and its subfolder) must not add the
+  // same font file twice.
+  std::sort(fonts_path_.begin(), fonts_path_.end());
+  fonts_path_.erase(std::unique(fonts_path_.begin(), fonts_path_.end()),
+                    fonts_path_.end());
 
   font_list_.reserve(fonts_path_.size());
 
@@ -153,7 +171,7 @@ void FontParser::SaveDB(const AString& db_path) {
 
   fs::path file_path(db_path);
   if (fs::is_regular_file(file_path)) {
-    logger_->Warn(_ST("\"{}\" already exists. It will be overwritten."),
+    logger_->Info(_ST("\"{}\" already exists. It will be overwritten."),
                   file_path.native());
   }
 

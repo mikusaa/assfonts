@@ -29,6 +29,7 @@
 
 #include "ThreadPool.h"
 #include <ghc/filesystem.hpp>
+#include <nlohmann/json.hpp>
 
 #include "ass_font_embedder.h"
 #include "ass_logger.h"
@@ -307,4 +308,77 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
       }
     }
   }
+}
+
+char* AssfontsCheck(const char** input_paths, const unsigned int num_paths,
+                    const char* db_path, const AssfontsLogCallback cb,
+                    const enum ASSFONTS_LOG_LEVEL log_level) {
+  auto logger = std::make_shared<ass::Logger>(ass::Logger(cb, log_level));
+
+  nlohmann::json results = nlohmann::json::array();
+
+  ass::FontParser fp(logger);
+
+  if (*db_path != '\0') {
+    fs::path db(db_path);
+    fp.LoadDB(db.native() + fs::path::preferred_separator + _ST("fonts.json"));
+  }
+
+  for (unsigned int idx = 0; idx < num_paths; ++idx) {
+    nlohmann::json result;
+    result["input"] = input_paths[idx];
+
+    std::string last_error;
+    auto t_logger = std::make_shared<ass::Logger>(ass::Logger(
+        [&](const char* msg, const ASSFONTS_LOG_LEVEL level) {
+          if (level == ASSFONTS_ERROR) {
+            last_error = msg;
+          }
+          if (cb != nullptr && level >= log_level) {
+            cb(msg, level);
+          }
+        },
+        log_level));
+
+    ass::AssParser ap(t_logger);
+
+    if (!ap.ReadFile(fs::path(input_paths[idx]).native())) {
+      result["ok"] = false;
+      result["error"] = last_error;
+      result["fonts"] = nlohmann::json::array();
+      results.emplace_back(result);
+      continue;
+    }
+
+    ass::FontSubsetter fsub(fp, ap.get_font_sets(), t_logger);
+
+    nlohmann::json fonts = nlohmann::json::array();
+    for (const auto& check_info : fsub.Check()) {
+      nlohmann::json font;
+      font["name"] = check_info.font_desc.fontname;
+      font["bold"] = check_info.font_desc.bold;
+      font["italic"] = check_info.font_desc.italic;
+      font["num_chars"] = check_info.num_chars;
+      font["found"] = check_info.is_found;
+      font["path"] = fs::path(check_info.font_path.path).u8string();
+      font["index"] = check_info.font_path.index;
+      font["missing_codepoints"] = check_info.missing_codepoints;
+      fonts.emplace_back(font);
+    }
+
+    result["ok"] = true;
+    result["error"] = "";
+    result["fonts"] = fonts;
+    results.emplace_back(result);
+  }
+
+  std::string dump = results.dump();
+  char* res = new char[dump.size() + 1];
+  std::copy(dump.begin(), dump.end(), res);
+  res[dump.size()] = '\0';
+  return res;
+}
+
+void AssfontsFreeString(char* str) {
+  delete[] str;
 }
