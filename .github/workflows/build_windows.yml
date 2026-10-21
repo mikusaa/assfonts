@@ -1,0 +1,72 @@
+name: Build Windows (test)
+run-name: Build Windows x64 for ${{ github.ref_name }}
+# A quick Windows-only build for feature branches. The full multi-platform
+# build lives in build_release.yml.
+on:
+  workflow_dispatch:
+  push:
+    branches: [ 'feat/**' ]
+jobs:
+  build-windows-x64:
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: powershell
+    env:
+      # vcpkg keeps compiled packages (Qt takes about an hour) here, and the
+      # cache steps below carry them between runs.
+      VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}\vcpkg-binary-cache
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: restore vcpkg packages
+        uses: actions/cache/restore@v4
+        with:
+          path: vcpkg-binary-cache
+          key: vcpkg-windows-x64-${{ hashFiles('vcpkg.json', '.github/windows/CMakeUserPresets.json') }}-${{ github.run_id }}
+          restore-keys: |
+            vcpkg-windows-x64-${{ hashFiles('vcpkg.json', '.github/windows/CMakeUserPresets.json') }}-
+
+      - name: create vcpkg cache folder
+        run: New-Item -ItemType Directory -Force -Path "$env:VCPKG_DEFAULT_BINARY_CACHE" | Out-Null
+
+      - name: install cmake
+        uses: lukka/get-cmake@latest
+
+      - name: setup msvc x86_64
+        uses: TheMrMilchmann/setup-msvc-dev@v3
+        with:
+          arch: x64
+
+      - name: build
+        run: |
+          Copy-Item -Path ".\.github\windows\CMakeUserPresets.json" -Destination "CMakeUserPresets.json" -Force
+          cmake . --preset windows-x64
+          cmake --build . --target install --preset windows-x64-release -j
+
+      - name: save vcpkg packages
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: vcpkg-binary-cache
+          key: vcpkg-windows-x64-${{ hashFiles('vcpkg.json', '.github/windows/CMakeUserPresets.json') }}-${{ github.run_id }}
+
+      - name: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: assfonts-windows-x64-${{ github.sha }}
+          path: |
+            out/install/windows-x64/bin/assfonts.exe
+            out/install/windows-x64/bin/assfonts-cli.exe
+          if-no-files-found: error
+
+      - name: upload vcpkg issue
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64-issue
+          path: out/build/windows-x64/vcpkg_installed/vcpkg/issue_body.md
+          if-no-files-found: ignore
