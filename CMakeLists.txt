@@ -3,6 +3,10 @@
 set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake"
     CACHE STRING "Vcpkg toolchain file")
 
+# Triplets the release builds need that upstream vcpkg doesn't ship.
+set(VCPKG_OVERLAY_TRIPLETS "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg-triplets"
+    CACHE STRING "Extra vcpkg triplets")
+
 project (assfonts CXX C)
 
 set(VERSION_MAJOR 0)

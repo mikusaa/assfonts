@@ -26,9 +26,9 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: vcpkg-binary-cache
-          key: vcpkg-windows-x64-${{ hashFiles('vcpkg.json', '.github/windows/CMakeUserPresets.json') }}-${{ github.run_id }}
+          key: vcpkg-windows-x64-${{ hashFiles('vcpkg.json', '.gitmodules', 'vcpkg-triplets/**', '.github/windows/CMakeUserPresets.json') }}-${{ github.run_id }}
           restore-keys: |
-            vcpkg-windows-x64-${{ hashFiles('vcpkg.json', '.github/windows/CMakeUserPresets.json') }}-
+            vcpkg-windows-x64-${{ hashFiles('vcpkg.json', '.gitmodules', 'vcpkg-triplets/**', '.github/windows/CMakeUserPresets.json') }}-
 
       - name: create vcpkg cache folder
         run: New-Item -ItemType Directory -Force -Path "$env:VCPKG_DEFAULT_BINARY_CACHE" | Out-Null
@@ -52,7 +52,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: vcpkg-binary-cache
-          key: vcpkg-windows-x64-${{ hashFiles('vcpkg.json', '.github/windows/CMakeUserPresets.json') }}-${{ github.run_id }}
+          key: vcpkg-windows-x64-${{ hashFiles('vcpkg.json', '.gitmodules', 'vcpkg-triplets/**', '.github/windows/CMakeUserPresets.json') }}-${{ github.run_id }}
 
       - name: upload
         uses: actions/upload-artifact@v4

@@ -26,7 +26,26 @@
                     "name": "dbus",
                     "platform": "linux"
                 },
-                "default-features",
+                {
+                    "name": "egl",
+                    "platform": "linux"
+                },
+                {
+                    "name": "fontconfig",
+                    "platform": "linux"
+                },
+                {
+                    "name": "xcb",
+                    "platform": "linux"
+                },
+                {
+                    "name": "xcb-xlib",
+                    "platform": "linux"
+                },
+                {
+                    "name": "xrender",
+                    "platform": "linux"
+                },
                 "doubleconversion",
                 "freetype",
                 "gui",

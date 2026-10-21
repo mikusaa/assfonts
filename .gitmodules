@@ -1,4 +1,4 @@
 [submodule "vcpkg"]
 	path = vcpkg
-	url = http://github.com/wyzdwdz/vcpkg.git
-	branch = vcpkg-assfonts
+	url = https://github.com/microsoft/vcpkg.git
+	branch = master
