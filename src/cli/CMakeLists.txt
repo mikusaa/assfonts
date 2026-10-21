@@ -7,7 +7,7 @@ set(THIRD_PARTY_LIBS nowide::nowide
 
 set(TARGET_SOURCES main.cc)
 
-set(TARGET_NAME assfonts)
+set(TARGET_NAME assfonts-cli)
 
 if(APPLE)
     list(APPEND TARGET_SOURCES get_app_support_dir.mm)

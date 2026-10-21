@@ -2,25 +2,25 @@
 .\"
 .\" SPDX-License-Identifier: GPL-3.0-or-later
 .\"
-.TH assfonts 1 2023-08-20 "Linux man-pages 6.04"
+.TH assfonts-cli 1 2023-08-20 "Linux man-pages 6.04"
 .SH "NAME"
-assfonts \- Subset fonts and embed them into an ASS subtitle
+assfonts-cli \- Subset fonts and embed them into an ASS subtitle
 .SH "SYNOPSIS"
-.B assfonts
+.B assfonts-cli
 .RI [ options ]
 .RI [ inputfiles ]...
 .SH "EXAMPLES"
-assfonts \-i <\fIfiles\fR>                  Embed subset fonts into ASS script
+assfonts-cli \-i <\fIfiles\fR>                  Embed subset fonts into ASS script
 .TP
-assfonts \-i <\fIfiles\fR>                  Same as above
+assfonts-cli \-i <\fIfiles\fR>                  Same as above
 .TP
-assfonts \-o <\fIdir\fR> \-s \-i <\fIfiles\fR>      Only subset fonts but not embed
+assfonts-cli \-o <\fIdir\fR> \-s \-i <\fIfiles\fR>      Only subset fonts but not embed
 .TP
-assfonts \-f <\fIdirs\fR> \-e \-i <\fIfiles\fR>     Only embed fonts without subset
+assfonts-cli \-f <\fIdirs\fR> \-e \-i <\fIfiles\fR>     Only embed fonts without subset
 .TP
-assfonts \-f <\fIdirs\fR> \-b                Build or update fonts database only
+assfonts-cli \-f <\fIdirs\fR> \-b                Build or update fonts database only
 .TP
-assfonts \-l <\fInum\fR> \-i <\fIfiles\fR>         Recolorize the subtitle for HDR contents
+assfonts-cli \-l <\fInum\fR> \-i <\fIfiles\fR>         Recolorize the subtitle for HDR contents
 .SH "DESCRIPTION"
 The
 .B assfonts
@@ -64,8 +64,8 @@ Then convert those subsetted fonts to .ttf fonts using some 3rdparty tools like 
 Finally, rerun this program by giving option \fB\-e\fR or \fB\-\-embed\-only\fR and setting fonts directory to subsetted fonts.
 For example:
 .TP
-assfonts \-s \-i <\fIass_file\fR>
+assfonts-cli \-s \-i <\fIass_file\fR>
 .TP
 otf2ttf <\fIass_file\fR>_subsetted/*.otf
 .TP
-assfonts \-n \-f <\fIass_file\fR>_subsetted/ \-i <\fIass_file\fR>
+assfonts-cli \-n \-f <\fIass_file\fR>_subsetted/ \-i <\fIass_file\fR>

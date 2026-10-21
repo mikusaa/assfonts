@@ -26,8 +26,8 @@ set(TARGET_SOURCES main.cc
                    settings_page.cc)
 
 if(WIN32)
-    set(TARGET_RESOURCES resources/assfonts-gui.rc
-                         resources/assfonts-gui.manifest)
+    set(TARGET_RESOURCES resources/assfonts.rc
+                         resources/assfonts.manifest)
 elseif(APPLE)
     list(APPEND TARGET_SOURCES get_app_support_dir.mm)
     set(TARGET_RESOURCES resources/icon.icns)
@@ -36,9 +36,9 @@ elseif(APPLE)
 else()
 endif()
 
-qt_add_resources(QT_RESOURCES resources/assfonts-gui.qrc)
+qt_add_resources(QT_RESOURCES resources/assfonts.qrc)
 
-set(TARGET_NAME assfonts-gui)
+set(TARGET_NAME assfonts)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -80,7 +80,7 @@ target_compile_features(${TARGET_NAME} PRIVATE ${CXX_STD_VER})
 
 set_target_properties(${TARGET_NAME} PROPERTIES WIN32_EXECUTABLE ON
                                                 MACOSX_BUNDLE ON
-                                                MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/src/qt/resources/assfonts-gui.plist)
+                                                MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/src/qt/resources/assfonts.plist)
 
 if(APPLE)
     install(TARGETS ${TARGET_NAME}

@@ -30,14 +30,16 @@ cmake --build .
 
 ### How to use
 
+The graphical app is `assfonts`; the command line tool is `assfonts-cli`.
+
 ```
-Usage:     assfonts [options...] [<files>]
-Examples:  assfonts <files>                  Embed subset fonts into ASS script
-           assfonts -i <files>               Same as above
-           assfonts -o <dir> -s -i <files>   Only subset fonts but not embed
-           assfonts -f <dirs> -e -i <files>  Only embed fonts without subset
-           assfonts -f <dirs> -b             Build or update fonts database only
-           assfonts -l <num> -i <files>      Recolorize the subtitle for HDR contents
+Usage:     assfonts-cli [options...] [<files>]
+Examples:  assfonts-cli <files>                  Embed subset fonts into ASS script
+           assfonts-cli -i <files>               Same as above
+           assfonts-cli -o <dir> -s -i <files>   Only subset fonts but not embed
+           assfonts-cli -f <dirs> -e -i <files>  Only embed fonts without subset
+           assfonts-cli -f <dirs> -b             Build or update fonts database only
+           assfonts-cli -l <num> -i <files>      Recolorize the subtitle for HDR contents
 Options:
   -i, --input         <files>   Input .ass files
   -o, --output        <dir>     Output directory  (Default: same directory as input)
@@ -56,7 +58,7 @@ Options:
   -h, --help                    Get help info
  ```
  
- When you first run this program, it's recommended to initialize font database first `assfonts -f <your_fonts_dir> -b` 
+ When you first run this program, it's recommended to initialize font database first `assfonts-cli -f <your_fonts_dir> -b` 
  If database path is not specified, it will be saved in `<your_current_working_directory>/fonts.json`
  
  **Caution!** According [ASS Specs](http://moodub.free.fr/video/ass-specs.doc), only Truetype fonts can be embedded into ASS Script. 
@@ -67,7 +69,7 @@ Options:
  fonts directory to subsetted fonts `-f <output_directory>/<input_file_name>_subsetted/`
  
  ```
- assfonts -s -i <ass_file>
+ assfonts-cli -s -i <ass_file>
  otf2ttf <ass_file>_subsetted/*.otf
- assfonts -f <ass_file>_subsetted/ -i <ass_file>
+ assfonts-cli -f <ass_file>_subsetted/ -i <ass_file>
  ```

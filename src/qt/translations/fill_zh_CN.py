@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Fills assfonts-gui_zh_CN.ts with the Simplified Chinese strings below.
+"""Fills assfonts_zh_CN.ts with the Simplified Chinese strings below.
 
 Usage (from the repository root, with Qt's linguist tools on PATH):
-    lupdate src/qt -ts src/qt/translations/assfonts-gui_zh_CN.ts
+    lupdate src/qt -ts src/qt/translations/assfonts_zh_CN.ts
     python3 src/qt/translations/fill_zh_CN.py
-    lrelease src/qt/translations/assfonts-gui_zh_CN.ts \
-        -qm src/qt/resources/i18n/assfonts-gui_zh_CN.qm
+    lrelease src/qt/translations/assfonts_zh_CN.ts \
+        -qm src/qt/resources/i18n/assfonts_zh_CN.qm
 
 The .qm file is committed, so building the app does not need Qt's linguist
 tools.
@@ -286,7 +286,7 @@ ZH_CN_CONTEXT = {
 
 
 def main() -> int:
-    ts_path = Path(__file__).with_name("assfonts-gui_zh_CN.ts")
+    ts_path = Path(__file__).with_name("assfonts_zh_CN.ts")
     tree = ET.parse(ts_path)
     root = tree.getroot()
     root.set("language", "zh_CN")

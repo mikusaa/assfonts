@@ -2,11 +2,11 @@ version: 1
 AppDir:
   path: /root/assfonts/AppDir
   app_info:
-    id: assfonts-gui
-    name: assfonts-gui
+    id: assfonts
+    name: assfonts
     icon: icon
     version: !!!VERSION!!!
-    exec: usr/bin/assfonts-gui
+    exec: usr/bin/assfonts
     exec_args: $@
   apt:
     arch:
@@ -58,5 +58,5 @@ AppDir:
 AppImage:
   arch: aarch64
   comp: xz
-  update-information: gh-releases-zsync|wyzdwdz|assfonts|latest|assfonts-gui-*-aarch64-Linux.AppImage.zsync
-  file_name: 'assfonts-gui-!!!VERSION!!!-aarch64-Linux.AppImage'
+  update-information: gh-releases-zsync|wyzdwdz|assfonts|latest|assfonts-*-aarch64-Linux.AppImage.zsync
+  file_name: 'assfonts-!!!VERSION!!!-aarch64-Linux.AppImage'

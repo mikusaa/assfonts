@@ -24,4 +24,4 @@ if [ -z "$FONTCONFIG_PATH" ]; then
     export FONTCONFIG_PATH=/etc/fonts
 fi
 
-exec "$APPDIR/usr/bin/assfonts-gui" "$@"
+exec "$APPDIR/usr/bin/assfonts" "$@"

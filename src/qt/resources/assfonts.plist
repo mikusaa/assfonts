@@ -7,11 +7,11 @@
   <key>CFBundleExecutable</key>
   <string>${MACOSX_BUNDLE_EXECUTABLE_NAME}</string>
   <key>CFBundleIdentifier</key>
-  <string>wyzdwdz.assfonts-gui</string>
+  <string>wyzdwdz.assfonts</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
-  <string>assfonts-gui</string>
+  <string>assfonts</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleIconFile</key>

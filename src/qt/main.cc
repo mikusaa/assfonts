@@ -60,7 +60,7 @@ void InstallTranslator(QApplication& app, QTranslator& translator,
   }
 
   if (language != "en" &&
-      translator.load(":/i18n/assfonts-gui_" + language + ".qm")) {
+      translator.load(":/i18n/assfonts_" + language + ".qm")) {
     app.installTranslator(&translator);
   }
 }

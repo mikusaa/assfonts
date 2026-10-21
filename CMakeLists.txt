@@ -38,11 +38,11 @@ install(FILES LICENSE NEWS NOTICE
 if(UNIX)
 
 install(CODE "
-    execute_process(COMMAND gzip -kf doc/man/assfonts.1
+    execute_process(COMMAND gzip -kf doc/man/assfonts-cli.1
                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 ")
 
-install(FILES doc/man/assfonts.1.gz
+install(FILES doc/man/assfonts-cli.1.gz
         DESTINATION ${CMAKE_INSTALL_MANDIR}/man1
         CONFIGURATIONS Release)
 
