@@ -45,7 +45,7 @@ jobs:
         run: |
           Copy-Item -Path ".\.github\windows\CMakeUserPresets.json" -Destination "CMakeUserPresets.json" -Force
           cmake . --preset windows-x64
-          cmake --build . --target install --preset windows-x64-release -j
+          cmake --build --preset windows-x64-release --target install -j
 
       - name: save vcpkg packages
         if: always()

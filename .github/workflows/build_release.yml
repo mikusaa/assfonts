@@ -47,7 +47,7 @@ jobs:
             cd /var/www
             cp ./.github/linux/CMakeUserPresets.json .
             cmake . --preset linux-${{ matrix.profile }}
-            cmake --build . --target install --preset linux-${{ matrix.profile }}-release -j
+            cmake --build --preset linux-${{ matrix.profile }}-release --target install -j
             mv ./out/install/linux-${{ matrix.profile }}/bin/assfonts-cli assfonts-cli-${{ github.ref_name }}-${{ matrix.arch }}-Linux
             cp ./.github/linux/AppImageBuilder_${{ matrix.profile }}.yml AppImageBuilder.yml
             mkdir -p ./AppDir/usr
@@ -115,7 +115,7 @@ jobs:
         run: |
           Copy-Item -Path ".\.github\windows\CMakeUserPresets.json" -Destination "CMakeUserPresets.json" -Force
           cmake . --preset windows-${{ matrix.profile }}
-          cmake --build . --target install --preset windows-${{ matrix.profile }}-release -j
+          cmake --build --preset windows-${{ matrix.profile }}-release --target install -j
 
       - name: copy and rename
         run: |
@@ -160,7 +160,7 @@ jobs:
           brew install automake autoconf-archive
           cp .github/macos/CMakeUserPresets.json .
           cmake . --preset macos-${{ matrix.profile }}
-          cmake --build . --preset macos-${{ matrix.profile }}-release --target package -j
+          cmake --build --preset macos-${{ matrix.profile }}-release --target package -j
 
       - name: rename
         run: |
