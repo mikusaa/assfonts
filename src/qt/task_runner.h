@@ -13,16 +13,22 @@
  *
  *  You should have received a copy of the GNU General Public
  *  License along with assfonts. If not, see <https://www.gnu.org/licenses/>.
- *  
+ *
  *  written by wyzdwdz (https://github.com/wyzdwdz)
  */
 
 #pragma once
 
+#include <atomic>
+
 #include <QObject>
+#include <QStringList>
+#include <QVariantMap>
 
 #include "assfonts.h"
 
+// Runs library calls on a worker thread. Slots are invoked through queued
+// connections, so requests are handled one after another.
 class TaskRunner : public QObject {
   Q_OBJECT
 
@@ -39,23 +45,36 @@ class TaskRunner : public QObject {
 
   inline bool IsRunning() { return is_running_; }
 
-  void OnBuildRun(const QString fonts_path, const QString db_path);
+  // Stops before the next subtitle starts. Safe to call from any thread.
+  void RequestStop() { is_stop_requested_ = true; }
 
-  void OnStartRun(const QString inputs_path, const QString output_path,
-                  const QString fonts_path, const QString db_path,
-                  const unsigned int brightness, const bool is_subset_only,
-                  const bool is_embed_only, const bool is_rename,
-                  const bool is_font_combined, const unsigned int num_thread);
+  // Rescans the font folders; unchanged files are taken from the database.
+  void OnBuildRun(const QStringList fonts_dirs, const QString db_path,
+                  const bool is_rebuild);
+
+  void OnCheckRun(const QStringList inputs, const QString db_path);
+
+  // `outputs` holds the output folder of each input. Options: db_path,
+  // brightness, subset_only, embed_only, rename, combined, multi_thread,
+  // update_db and fonts_dirs (used when update_db is set).
+  void OnStartRun(const QStringList inputs, const QStringList outputs,
+                  const QVariantMap options);
 
  signals:
   void OnSendLog(QString msg, ASSFONTS_LOG_LEVEL log_level);
-  void OnSendClearFont();
-  void OnSendBuildRelease();
-  void OnSendStartRelease();
+  void OnSendBusy(bool is_busy, QString what);
+  void OnSendBuildDone();
+  void OnSendCheckDone(QStringList inputs, QString json);
+  void OnSendFileStarted(QString input);
+  void OnSendFileDone(QString input, bool is_ok, QString error);
+  void OnSendStartDone(bool is_stopped);
 
  private:
-  bool is_running_ = false;
+  std::atomic<bool> is_running_{false};
+  std::atomic<bool> is_stop_requested_{false};
 
   TaskRunner(QObject* parent = nullptr) : QObject(parent){};
   ~TaskRunner() = default;
+
+  void BuildDB(const QStringList& fonts_dirs, const QString& db_path);
 };

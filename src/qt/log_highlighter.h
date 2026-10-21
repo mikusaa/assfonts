@@ -13,15 +13,17 @@
  *
  *  You should have received a copy of the GNU General Public
  *  License along with assfonts. If not, see <https://www.gnu.org/licenses/>.
- *  
+ *
  *  written by wyzdwdz (https://github.com/wyzdwdz)
  */
 
 #pragma once
 
-#include <QRegularExpression>
 #include <QSyntaxHighlighter>
 
+#include "assfonts.h"
+
+// Colors log lines by the level stored in each block's user state.
 class LogHighlighter : public QSyntaxHighlighter {
   Q_OBJECT
 
@@ -34,6 +36,5 @@ class LogHighlighter : public QSyntaxHighlighter {
   void highlightBlock(const QString& text) override;
 
  private:
-  QTextCharFormat info_format_, warn_format_, error_format_;
-  QRegularExpression info_expression_, warn_expression_, error_expression_;
+  QTextCharFormat info_format_, warn_format_, error_format_, text_format_;
 };

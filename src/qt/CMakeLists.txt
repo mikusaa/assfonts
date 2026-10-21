@@ -16,8 +16,14 @@ set(TARGET_SOURCES main.cc
                    task_runner.cc
                    log_highlighter.cc
                    check_window.cc
-                   drop_lineedit.cc
-                   checkable_button.cc)
+                   theme.cc
+                   widgets.cc
+                   font_db.cc
+                   log_translator.cc
+                   log_panel.cc
+                   process_page.cc
+                   library_page.cc
+                   settings_page.cc)
 
 if(WIN32)
     set(TARGET_RESOURCES resources/assfonts-gui.rc
@@ -55,6 +61,12 @@ endif()
 target_sources(${TARGET_NAME} PRIVATE ${QT_RESOURCES} ${TARGET_RESOURCES})
 
 target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS} libassfonts)
+
+# Static Qt (the vcpkg builds) needs its platform plugins imported in main.cc.
+get_target_property(QT_CORE_TYPE Qt::Core TYPE)
+if(QT_CORE_TYPE STREQUAL "STATIC_LIBRARY")
+    target_compile_definitions(${TARGET_NAME} PRIVATE ASSFONTS_STATIC_QT)
+endif()
 
 if(APPLE)
     target_link_options(${TARGET_NAME} PRIVATE -framework Foundation)

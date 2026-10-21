@@ -13,21 +13,19 @@
  *
  *  You should have received a copy of the GNU General Public
  *  License along with assfonts. If not, see <https://www.gnu.org/licenses/>.
- *  
+ *
  *  written by wyzdwdz (https://github.com/wyzdwdz)
  */
 
 #include "main_window.h"
 
-#include <thread>
-
+#include <QApplication>
+#include <QCloseEvent>
+#include <QDesktopServices>
 #include <QDir>
-#include <QFileDialog>
-#include <QFileInfo>
-#include <QMenuBar>
 #include <QMessageBox>
 #include <QMetaType>
-#include <QRegularExpression>
+#include <QUrl>
 #include <ghc/filesystem.hpp>
 
 #ifdef __APPLE__
@@ -36,6 +34,8 @@
 #include <Shlobj.h>
 #else
 #endif
+
+#include "theme.h"
 
 namespace fs = ghc::filesystem;
 
@@ -61,691 +61,353 @@ static std::string SAVE_FILES_PATH = []() {
   return path.u8string();
 }();
 
-void MainWindow::closeEvent(QCloseEvent* event) {
-  if (worker_->IsRunning()) {
-    QMessageBox::warning(this, tr("Warning"), tr("Program is still running"));
-
-    event->ignore();
-
-  } else {
-    thread_.quit();
-    thread_.wait();
-
-    SaveSettings();
-
-    event->accept();
+QString MainWindow::AppDataDir() {
+  // Lets tests and portable setups keep settings and the library elsewhere.
+  if (qEnvironmentVariableIsSet("ASSFONTS_DATA_DIR")) {
+    return QDir::toNativeSeparators(qEnvironmentVariable("ASSFONTS_DATA_DIR"));
   }
+  return QDir::toNativeSeparators(QString::fromStdString(SAVE_FILES_PATH));
 }
 
-void MainWindow::changeEvent(QEvent* event) {
-  if (event->type() == QEvent::ThemeChange) {
-    log_highlighter_->SetColor();
-    RefreshLogText();
-  }
-
-  event->accept();
-}
-
-void MainWindow::InitMenu() {
-  QMenuBar* menu_bar = new QMenuBar;
-  log_menu_ = menu_bar->addMenu(tr("&Log"));
-  info_menu_ = menu_bar->addMenu(tr("&Other"));
-
-  log_menu_->setToolTipsVisible(true);
-  info_menu_->setToolTipsVisible(true);
-
-  clear_action_ = new QAction(tr("&Clear all"));
-
-  space_action_ = new QAction(tr("&Print space"));
-  space_action_->setCheckable(true);
-  space_action_->setChecked(true);
-
-  mt_action_ = new QAction(tr("&Multi thread"));
-  mt_action_->setCheckable(true);
-  mt_action_->setChecked(false);
-
-  combined_action_ = new QAction(tr("&Font combined"));
-  combined_action_->setCheckable(true);
-  combined_action_->setChecked(false);
-
-  reset_action_ = new QAction(tr("&Reset all"));
-
-  check_action_ = new QAction(tr("&Check update"));
-
-  log_menu_->addAction(clear_action_);
-  log_menu_->addAction(space_action_);
-
-  min_level_menu_ = log_menu_->addMenu(tr("&Show log level"));
-
-  min_info_action_ = new QAction(tr(">= INFO"));
-  min_info_action_->setCheckable(true);
-  min_info_action_->setChecked(true);
-
-  min_warn_action_ = new QAction(tr(">= WARN"));
-  min_warn_action_->setCheckable(true);
-  min_warn_action_->setChecked(false);
-
-  min_error_action_ = new QAction(tr(">= ERROR"));
-  min_error_action_->setCheckable(true);
-  min_error_action_->setChecked(false);
-
-  min_level_menu_->addAction(min_info_action_);
-  min_level_menu_->addAction(min_warn_action_);
-  min_level_menu_->addAction(min_error_action_);
-
-  info_menu_->addAction(mt_action_);
-  info_menu_->addAction(combined_action_);
-  info_menu_->addAction(reset_action_);
-  info_menu_->addAction(check_action_);
-
-  setMenuBar(menu_bar);
-}
-
-void MainWindow::InitMainWindowLayout() {
-  QHBoxLayout* main_window_hlayout = new QHBoxLayout;
-
-  main_window_hlayout->addSpacing(4);
-
-  QVBoxLayout* main_window_vlayout = new QVBoxLayout;
-  main_window_vlayout->setAlignment(Qt::AlignTop);
-
-  AddInputLayout(main_window_vlayout);
-  AddOutputLayout(main_window_vlayout);
-  AddFontLayout(main_window_vlayout);
-  AddDatabaseLayout(main_window_vlayout);
-  AddButtonsLayout(main_window_vlayout);
-  AddLogLayout(main_window_vlayout);
-
-  main_window_hlayout->addLayout(main_window_vlayout);
-  main_window_hlayout->addSpacing(4);
-
-  QWidget* widget = new QWidget;
-  widget->setLayout(main_window_hlayout);
-  setCentralWidget(widget);
-}
-
-void MainWindow::AddInputLayout(QVBoxLayout* layout) {
-  QVBoxLayout* vlayout = new QVBoxLayout;
-
-  input_label_ = new QLabel(tr("Input ASS files"));
-
-  QFont font;
-  font.setWeight(QFont::Bold);
-  input_label_->setFont(font);
-
-  vlayout->addWidget(input_label_);
-
-  QHBoxLayout* hlayout = new QHBoxLayout;
-
-  input_line_ = new DropLineEdit;
-  input_line_->setMinimumHeight(25);
-  hlayout->addWidget(input_line_);
-
-  input_button_ = new QPushButton("...");
-  input_button_->setFixedSize(25, 25);
-  hlayout->addWidget(input_button_);
-
-  vlayout->addLayout(hlayout);
-  vlayout->setAlignment(Qt::AlignTop);
-
-  layout->addLayout(vlayout);
-  layout->addSpacing(8);
-}
-
-void MainWindow::AddOutputLayout(QVBoxLayout* layout) {
-  QVBoxLayout* vlayout = new QVBoxLayout;
-
-  output_label_ = new QLabel(tr("Output directory"));
-
-  QFont font;
-  font.setWeight(QFont::Bold);
-  output_label_->setFont(font);
-
-  vlayout->addWidget(output_label_);
-
-  QHBoxLayout* hlayout = new QHBoxLayout;
-
-  output_line_ = new DropLineEdit;
-  output_line_->setMinimumHeight(25);
-  hlayout->addWidget(output_line_);
-
-  output_button_ = new QPushButton("...");
-  output_button_->setFixedSize(25, 25);
-  hlayout->addWidget(output_button_);
-
-  vlayout->addLayout(hlayout);
-  vlayout->setAlignment(Qt::AlignTop);
-
-  layout->addLayout(vlayout);
-  layout->addSpacing(8);
-}
-
-void MainWindow::AddFontLayout(QVBoxLayout* layout) {
-  QVBoxLayout* vlayout = new QVBoxLayout;
-
-  font_label_ = new QLabel(tr("Font directory"));
-
-  QFont font;
-  font.setWeight(QFont::Bold);
-  font_label_->setFont(font);
-
-  vlayout->addWidget(font_label_);
-
-  QHBoxLayout* hlayout = new QHBoxLayout;
-
-  font_line_ = new DropLineEdit;
-  font_line_->setMinimumHeight(25);
-  hlayout->addWidget(font_line_);
-
-  font_button_ = new QPushButton("...");
-  font_button_->setFixedSize(25, 25);
-  hlayout->addWidget(font_button_);
-
-  vlayout->addLayout(hlayout);
-  vlayout->setAlignment(Qt::AlignTop);
-
-  layout->addLayout(vlayout);
-  layout->addSpacing(8);
-}
-
-void MainWindow::AddDatabaseLayout(QVBoxLayout* layout) {
-  QVBoxLayout* vlayout = new QVBoxLayout;
-
-  database_label_ = new QLabel(tr("Database directory"));
-
-  QFont font;
-  font.setWeight(QFont::Bold);
-  database_label_->setFont(font);
-
-  vlayout->addWidget(database_label_);
-
-  QHBoxLayout* hlayout = new QHBoxLayout;
-
-  database_line_ = new DropLineEdit;
-  database_line_->setMinimumHeight(25);
-
-  QDir appdata_dir(QString::fromStdString(SAVE_FILES_PATH));
-
-  database_line_->setText(QDir::toNativeSeparators(appdata_dir.absolutePath()));
-
-  hlayout->addWidget(database_line_);
-
-  database_button_ = new QPushButton("...");
-  database_button_->setFixedSize(25, 25);
-  hlayout->addWidget(database_button_);
-
-  vlayout->addLayout(hlayout);
-  vlayout->setAlignment(Qt::AlignTop);
-
-  layout->addLayout(vlayout);
-  layout->addSpacing(16);
-}
-
-void MainWindow::AddButtonsLayout(QVBoxLayout* layout) {
-  QHBoxLayout* hlayout = new QHBoxLayout;
-
-  hlayout->addSpacing(8);
-
-  hdr_combo_ = new QComboBox;
-  hdr_combo_->addItem(tr("No HDR"));
-  hdr_combo_->addItem(tr("HDR Low"));
-  hdr_combo_->addItem(tr("HDR High"));
-  hdr_combo_->setMinimumSize(90, 25);
-  hlayout->addWidget(hdr_combo_, 0, Qt::AlignVCenter);
-  hlayout->addSpacing(16);
-
-  subset_checkbox_ = new QCheckBox(tr("Subset only"));
-  hlayout->addWidget(subset_checkbox_, 0, Qt::AlignVCenter);
-  hlayout->addSpacing(8);
-
-  embed_checkbox_ = new QCheckBox(tr("Embed only"));
-  hlayout->addWidget(embed_checkbox_, 0, Qt::AlignVCenter);
-  hlayout->addSpacing(8);
-
-  rename_checkbox_ = new QCheckBox(tr("Subfonts rename"));
-  hlayout->addWidget(rename_checkbox_, 0, Qt::AlignVCenter);
-  hlayout->addSpacing(16);
-  hlayout->addStretch();
-
-  build_button_ = new CheckableButton(tr("Build Database"));
-  build_button_->setMinimumSize(110, 50);
-  hlayout->addWidget(build_button_, 0, Qt::AlignVCenter);
-  hlayout->addSpacing(10);
-
-  start_button_ = new CheckableButton(tr("Start"));
-
-  QFont font;
-  font.setWeight(QFont::Bold);
-  start_button_->setFont(font);
-
-  start_button_->setMinimumSize(80, 50);
-  hlayout->addWidget(start_button_, 0, Qt::AlignVCenter);
-
-  hlayout->addSpacing(8);
-
-  layout->addLayout(hlayout);
-  layout->addSpacing(8);
-}
-
-void MainWindow::AddLogLayout(QVBoxLayout* layout) {
-  log_text_ = new QTextEdit;
-
-  log_highlighter_ = new LogHighlighter(log_text_->document());
-
-  log_text_->setReadOnly(true);
-
-  QString version_info = "assfonts -- version " +
-                         QString::number(ASSFONTS_VERSION_MAJOR) + "." +
-                         QString::number(ASSFONTS_VERSION_MINOR) + "." +
-                         QString::number(ASSFONTS_VERSION_PATCH);
-
-  log_buffer_.push_back({ASSFONTS_TEXT, version_info});
-  log_buffer_.push_back({ASSFONTS_TEXT, ""});
-  RefreshLogText();
-
-  layout->addWidget(log_text_, 1);
-}
-
-void MainWindow::InitToolTips() {
-  hdr_combo_->setToolTip(
-      tr("Change HDR subtitle brightness\n"
-         " HDR Low  targets 100 nit\n"
-         " HDR High  targets 203 nit"));
-
-  subset_checkbox_->setToolTip(
-      tr("Subset fonts but not embed them into subtitle"));
-
-  embed_checkbox_->setToolTip(
-      tr("Embed fonts into subtitle but not subset them"));
-
-  rename_checkbox_->setToolTip(
-      tr("Rename subsetted fonts to ensure the one-to-one\n"
-         "correspondence between one subtitle and one series of fonts"));
-
-  build_button_->setToolTip(tr("Build fonts database"));
-
-  start_button_->setToolTip(tr("Start program"));
-
-  mt_action_->setToolTip(
-      tr("Enable multi thread mode. May cause huge RAM usage"));
-
-  combined_action_->setToolTip(
-      tr("!!Experimental!! When there are multiple input files,\n"
-         "combine the subsetted fonts with the same fontname together"));
-}
-
-void MainWindow::InitAllConnects() {
+MainWindow::MainWindow(QSettings* settings, QWidget* parent)
+    : QMainWindow(parent), settings_(settings) {
   qRegisterMetaType<ASSFONTS_LOG_LEVEL>("ASSFONTS_LOG_LEVEL");
 
-  connect(input_button_, &QPushButton::clicked, this,
-          &MainWindow::OnInputButtonClicked);
-  connect(output_button_, &QPushButton::clicked, this,
-          &MainWindow::OnOutputButtonClicked);
-  connect(font_button_, &QPushButton::clicked, this,
-          &MainWindow::OnFontButtonClicked);
-  connect(database_button_, &QPushButton::clicked, this,
-          &MainWindow::OnDatabaseButtonClicked);
+  setWindowTitle("assfonts");
+  setWindowIcon(QIcon(":/icon.png"));
 
-  connect(input_line_, &DropLineEdit::OnSendDrop, this,
-          &MainWindow::OnInputLineDrop);
-  connect(output_line_, &DropLineEdit::OnSendDrop, this,
-          &MainWindow::OnOutputLineDrop);
-  connect(font_line_, &DropLineEdit::OnSendDrop, this,
-          &MainWindow::OnFontLineDrop);
-  connect(database_line_, &DropLineEdit::OnSendDrop, this,
-          &MainWindow::OnDatabaseLineDrop);
+  MigrateOldSettings();
+  if (settings_->value("Library/Database").toString().isEmpty()) {
+    settings_->setValue("Library/Database", AppDataDir());
+  }
 
-  connect(build_button_, &CheckableButton::OnSendPressed, this,
-          &MainWindow::OnBuildButtonPressed);
-  connect(start_button_, &CheckableButton::OnSendPressed, this,
-          &MainWindow::OnStartButtonPressed);
+  worker_ = &TaskRunner::GetInstance();
+  font_db_.Load(DbPath());
 
+  auto* central = new QWidget;
+  central->setObjectName("central");
+  auto* hlayout = new QHBoxLayout(central);
+  hlayout->setContentsMargins(0, 0, 0, 0);
+  hlayout->setSpacing(0);
+
+  hlayout->addWidget(InitSidebar());
+
+  auto* right = new QVBoxLayout;
+  right->setContentsMargins(0, 0, 0, 0);
+  right->setSpacing(0);
+
+  stack_ = new QStackedWidget;
+  process_page_ = new ProcessPage(settings_, &font_db_);
+  library_page_ = new LibraryPage(settings_, &font_db_);
+  settings_page_ = new SettingsPage(settings_);
+  stack_->addWidget(process_page_);
+  stack_->addWidget(library_page_);
+  stack_->addWidget(settings_page_);
+  right->addWidget(stack_, 1);
+
+  auto* log_wrap = new QWidget;
+  log_wrap->setObjectName("page");
+  auto* log_layout = new QVBoxLayout(log_wrap);
+  log_layout->setContentsMargins(28, 0, 28, 20);
+  log_panel_ = new LogPanel;
+  log_panel_->setMaximumHeight(240);
+  log_layout->addWidget(log_panel_);
+  right->addWidget(log_wrap);
+
+  hlayout->addLayout(right, 1);
+  setCentralWidget(central);
+
+  InitConnects();
+  LoadSettings();
+
+  library_page_->Refresh();
+  process_page_->RefreshLibraryStatus(library_page_->FontDirs().size());
+
+  log_panel_->Append(QString("assfonts %1.%2.%3")
+                         .arg(ASSFONTS_VERSION_MAJOR)
+                         .arg(ASSFONTS_VERSION_MINOR)
+                         .arg(ASSFONTS_VERSION_PATCH),
+                     ASSFONTS_TEXT);
+
+  // First start: point the user at the library.
+  if (font_db_.IsEmpty() && library_page_->FontDirs().isEmpty()) {
+    ShowPage(1);
+  }
+}
+
+QWidget* MainWindow::InitSidebar() {
+  auto* sidebar = new QWidget;
+  sidebar->setObjectName("sidebar");
+  sidebar->setAttribute(Qt::WA_StyledBackground);
+  sidebar->setFixedWidth(208);
+
+  auto* layout = new QVBoxLayout(sidebar);
+  layout->setContentsMargins(12, 18, 12, 12);
+  layout->setSpacing(4);
+
+  auto* brand = new QHBoxLayout;
+  brand->setContentsMargins(8, 0, 8, 18);
+  brand->setSpacing(10);
+  auto* logo = new QLabel;
+  logo->setPixmap(QIcon(":/icon.png").pixmap(32, 32));
+  logo->setFixedSize(32, 32);
+  brand->addWidget(logo);
+  auto* brand_texts = new QVBoxLayout;
+  brand_texts->setSpacing(0);
+  auto* name = new QLabel("assfonts");
+  name->setObjectName("brandName");
+  brand_texts->addWidget(name);
+  brand_texts->addWidget(ui::Label(tr("Subtitle font embedding"), "caption"));
+  brand->addLayout(brand_texts, 1);
+  layout->addLayout(brand);
+
+  nav_group_ = new QButtonGroup(this);
+  nav_group_->setExclusive(true);
+
+  const QList<QPair<QString, QString>> items = {
+      {tr("Process subtitles"), "file"},
+      {tr("Font library"), "font"},
+      {tr("Settings"), "settings"}};
+
+  for (int idx = 0; idx < items.size(); ++idx) {
+    auto* button = new QPushButton;
+    button->setText(items.at(idx).first);
+    button->setProperty("nav", true);
+    button->setProperty("iconName", items.at(idx).second);
+    button->setProperty("iconPx", 18);
+    button->setCheckable(true);
+    button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    button->setCursor(Qt::PointingHandCursor);
+    nav_group_->addButton(button, idx);
+    layout->addWidget(button);
+
+    connect(button, &QPushButton::toggled, this,
+            [button]() { ui::RefreshIcon(button); });
+  }
+  nav_group_->button(0)->setChecked(true);
+
+  layout->addStretch();
+
+  auto* footer = new QHBoxLayout;
+  footer->setContentsMargins(10, 0, 10, 0);
+  footer->addWidget(ui::Label(QString("v%1.%2.%3")
+                                  .arg(ASSFONTS_VERSION_MAJOR)
+                                  .arg(ASSFONTS_VERSION_MINOR)
+                                  .arg(ASSFONTS_VERSION_PATCH),
+                              "caption"));
+  footer->addStretch();
+  auto* update_button = ui::Button(tr("Check for updates"), "link");
+  footer->addWidget(update_button);
+  layout->addLayout(footer);
+
+  connect(nav_group_, &QButtonGroup::idClicked, this, &MainWindow::ShowPage);
+  connect(update_button, &QPushButton::clicked, this,
+          &MainWindow::ShowCheckWindow);
+
+  ui::RefreshIcons(sidebar);
+  return sidebar;
+}
+
+void MainWindow::InitConnects() {
+  // Requests to the worker thread.
   connect(this, &MainWindow::OnSendBuild, worker_, &TaskRunner::OnBuildRun);
+  connect(this, &MainWindow::OnSendCheck, worker_, &TaskRunner::OnCheckRun);
   connect(this, &MainWindow::OnSendStart, worker_, &TaskRunner::OnStartRun);
 
-  connect(worker_, &TaskRunner::OnSendBuildRelease, this,
-          [this]() { build_button_->setChecked(false); });
-  connect(worker_, &TaskRunner::OnSendStartRelease, this,
-          [this]() { start_button_->setChecked(false); });
+  // Results from the worker thread.
+  connect(worker_, &TaskRunner::OnSendLog, this,
+          [this](QString msg, ASSFONTS_LOG_LEVEL level) {
+            log_panel_->Append(msg, level);
+          });
 
-  connect(worker_, &TaskRunner::OnSendLog, this, &MainWindow::OnReceiveLog);
+  connect(worker_, &TaskRunner::OnSendBusy, this,
+          [this](bool is_busy, QString what) {
+            process_page_->SetBusy(is_busy);
+            library_page_->SetBusy(is_busy);
+            setWindowTitle(is_busy ? QString("assfonts · %1").arg(what)
+                                   : QString("assfonts"));
+          });
 
-  connect(worker_, &TaskRunner::OnSendClearFont, this,
-          [this]() { font_line_->clear(); });
-
-  connect(clear_action_, &QAction::triggered, this,
-          &MainWindow::OnClearActionTrigger);
-
-  connect(space_action_, &QAction::triggered, this,
-          [this]() { RefreshLogText(); });
-
-  connect(min_info_action_, &QAction::triggered, this,
-          &MainWindow::OnInfoActionTrigger);
-  connect(min_warn_action_, &QAction::triggered, this,
-          &MainWindow::OnWarnActionTrigger);
-  connect(min_error_action_, &QAction::triggered, this,
-          &MainWindow::OnErrorActionTrigger);
-
-  connect(reset_action_, &QAction::triggered, this,
-          &MainWindow::OnResetActionTrigger);
-
-  connect(check_action_, &QAction::triggered, this,
-          &MainWindow::OnCheckActionTrigger);
-}
-
-void MainWindow::InitWorker() {
-  worker_ = &TaskRunner::GetInstance();
-  worker_->moveToThread(&thread_);
-
-  thread_.start();
-}
-
-void MainWindow::OnInputButtonClicked() {
-  QString start_path;
-  QFileInfo file(input_line_->text().split(";").at(0).trimmed());
-  QDir parent_dir = file.dir();
-  if (parent_dir.path() != "." && parent_dir.exists()) {
-    start_path = parent_dir.path();
-  } else {
-    start_path = QDir::homePath();
-  }
-
-  QStringList path_list = QFileDialog::getOpenFileNames(
-      this, tr("Choose Files - Input ASS Files"), start_path,
-      tr("Sub Station Alpha (*.ass *.ssa)"));
-
-  if (path_list.empty()) {
-    return;
-  }
-
-  input_line_->clear();
-
-  for (auto it = path_list.begin(); it != path_list.end(); ++it) {
-    if (it != path_list.begin()) {
-      input_line_->insert("; ");
-    }
-
-    input_line_->insert(QDir::toNativeSeparators(*it));
-  }
-
-  QFileInfo file_info(path_list.at(0));
-  output_line_->setText(
-      QDir::toNativeSeparators(file_info.dir().absolutePath()));
-}
-
-void MainWindow::OnOutputButtonClicked() {
-  QString start_path;
-  QDir dir(output_line_->text().trimmed());
-  if (dir.path() != "." && dir.exists()) {
-    start_path = dir.path();
-  } else {
-    start_path = QDir::homePath();
-  }
-
-  QString path = QFileDialog::getExistingDirectory(
-      this, tr("Choose Directory - Output directory"), start_path);
-
-  if (!path.isEmpty()) {
-    output_line_->setText(QDir::toNativeSeparators(path));
-  }
-}
-
-void MainWindow::OnFontButtonClicked() {
-  QString start_path;
-  QDir dir(font_line_->text().trimmed());
-  if (dir.path() != "." && dir.exists()) {
-    start_path = dir.path();
-  } else {
-    start_path = QDir::homePath();
-  }
-
-  QString path = QFileDialog::getExistingDirectory(
-      this, tr("Choose Directory - Font directory"), start_path);
-
-  if (!path.isEmpty()) {
-    font_line_->setText(QDir::toNativeSeparators(path));
-  }
-}
-
-void MainWindow::OnDatabaseButtonClicked() {
-  QString start_path;
-  QDir dir(database_line_->text().trimmed());
-  if (dir.path() != "." && dir.exists()) {
-    start_path = dir.path();
-  } else {
-    start_path = QDir::homePath();
-  }
-
-  QString path = QFileDialog::getExistingDirectory(
-      this, tr("Choose Directory - Database directory"), start_path);
-
-  if (!path.isEmpty()) {
-    database_line_->setText(QDir::toNativeSeparators(path));
-  }
-}
-
-void MainWindow::OnInputLineDrop(QList<QString> paths) {
-  for (auto it = paths.begin(); it != paths.end();) {
-    QFileInfo file_info(*it);
-    QString suffix = file_info.suffix().toLower();
-
-    if (!file_info.isFile() || (suffix != "ass" && suffix != "ssa")) {
-      it = paths.erase(it);
+  connect(worker_, &TaskRunner::OnSendBuildDone, this, [this]() {
+    ReloadDatabase();
+    if (is_retry_pending_) {
+      // The retry already queued its own check.
+      is_retry_pending_ = false;
     } else {
-      ++it;
+      process_page_->CheckAll();
     }
-  }
+  });
 
-  if (!paths.isEmpty()) {
-    input_line_->clear();
-  } else {
-    return;
-  }
+  connect(worker_, &TaskRunner::OnSendCheckDone, this,
+          [this](QStringList inputs, QString json) {
+            process_page_->OnCheckDone(inputs, json);
+          });
 
-  for (auto it = paths.begin(); it != paths.end(); ++it) {
-    if (it != paths.begin()) {
-      input_line_->insert("; ");
+  connect(worker_, &TaskRunner::OnSendFileStarted, process_page_,
+          &ProcessPage::OnFileStarted);
+  connect(worker_, &TaskRunner::OnSendFileDone, process_page_,
+          &ProcessPage::OnFileDone);
+
+  connect(worker_, &TaskRunner::OnSendStartDone, this,
+          [this](bool is_stopped) {
+            process_page_->OnRunDone(is_stopped);
+            ReloadDatabase();
+
+            if (log_panel_->NumProblems() > 0 &&
+                settings_->value("Log/AutoExpand", true).toBool()) {
+              log_panel_->SetExpanded(true);
+            }
+
+            if (!is_stopped && log_panel_->NumProblems() == 0 &&
+                settings_->value("Run/OpenOutput", false).toBool()) {
+              QDesktopServices::openUrl(QUrl::fromLocalFile(
+                  settings_->value("Process/LastOutputDir").toString()));
+            }
+          });
+
+  // Processing page.
+  connect(process_page_, &ProcessPage::RequestCheck, this,
+          [this](QStringList inputs) { emit OnSendCheck(inputs, DbPath()); });
+
+  connect(process_page_, &ProcessPage::RequestStart, this,
+          [this](QStringList inputs, QStringList outputs, QVariantMap options) {
+            log_panel_->BeginRun(
+                tr("Processing %n subtitle(s)", "", inputs.size()));
+
+            options["db_path"] = DbPath();
+            options["multi_thread"] =
+                settings_->value("Run/MultiThread", false).toBool();
+            options["update_db"] =
+                process_page_->IsAutoUpdate() && !is_retry_pending_;
+            options["fonts_dirs"] = library_page_->FontDirs();
+            settings_->setValue("Process/LastOutputDir", outputs.value(0));
+
+            emit OnSendStart(inputs, outputs, options);
+          });
+
+  connect(process_page_, &ProcessPage::RequestStop, this,
+          [this]() { worker_->RequestStop(); });
+
+  connect(process_page_, &ProcessPage::RequestUpdateAndRetry, this,
+          [this](QStringList inputs) {
+            is_retry_pending_ = true;
+            UpdateLibrary(false);
+            emit OnSendCheck(inputs, DbPath());
+            process_page_->Start(inputs);
+          });
+
+  connect(process_page_, &ProcessPage::RequestShowLibrary, this,
+          [this](QString search) {
+            ShowPage(1);
+            if (!search.isEmpty()) {
+              library_page_->ShowSearch(search);
+            }
+          });
+
+  connect(process_page_, &ProcessPage::AutoUpdateChanged, this,
+          [this](bool checked) {
+            library_page_->SetAutoUpdate(checked);
+            settings_->setValue("Library/AutoUpdate", checked);
+          });
+
+  // Library page.
+  connect(library_page_, &LibraryPage::RequestBuild, this,
+          &MainWindow::UpdateLibrary);
+
+  connect(library_page_, &LibraryPage::DirsChanged, this, [this]() {
+    process_page_->RefreshLibraryStatus(library_page_->FontDirs().size());
+    UpdateLibrary(false);
+  });
+
+  connect(library_page_, &LibraryPage::AutoUpdateChanged, this,
+          [this](bool checked) {
+            process_page_->SetAutoUpdate(checked);
+            settings_->setValue("Library/AutoUpdate", checked);
+          });
+
+  connect(library_page_, &LibraryPage::ChangesScanned, this,
+          [this](bool has_changes) {
+            if (is_startup_scan_) {
+              is_startup_scan_ = false;
+              if (has_changes &&
+                  settings_->value("Library/CheckOnStart", true).toBool()) {
+                UpdateLibrary(false);
+              }
+            }
+          });
+
+  // Settings page.
+  connect(settings_page_, &SettingsPage::LanguageChanged, this, [this]() {
+    if (ConfirmIdle()) {
+      SaveSettings();
+      emit RestartRequested();
     }
+  });
 
-    input_line_->insert(QDir::toNativeSeparators(*it));
-  }
+  connect(settings_page_, &SettingsPage::ThemeChanged, this,
+          &MainWindow::ApplyTheme);
 
-  QFileInfo file_info(paths.at(0));
-  output_line_->setText(
-      QDir::toNativeSeparators(file_info.dir().absolutePath()));
-}
+  connect(settings_page_, &SettingsPage::DatabaseDirChanged, this,
+          [this]() { ReloadDatabase(); });
 
-void MainWindow::OnOutputLineDrop(QList<QString> paths) {
-  for (auto it = paths.begin(); it != paths.end();) {
-    QDir dir(*it);
+  connect(settings_page_, &SettingsPage::AutoClearLogChanged, log_panel_,
+          &LogPanel::SetAutoClear);
+  connect(log_panel_, &LogPanel::AutoClearChanged, this, [this](bool checked) {
+    settings_->setValue("Log/AutoClear", checked);
+    settings_page_->SetAutoClearLog(checked);
+  });
 
-    if (!dir.exists()) {
-      it = paths.erase(it);
-    } else {
-      ++it;
+  connect(settings_page_, &SettingsPage::ResetRequested, this, [this]() {
+    if (!ConfirmIdle()) {
+      return;
     }
-  }
+    const QStringList dirs = library_page_->FontDirs();
+    const QString db = DbPath();
+    settings_->clear();
+    settings_->setValue("Library/Dirs", dirs);
+    settings_->setValue("Library/Database", db);
+    settings_->sync();
+    emit RestartRequested();
+  });
 
-  if (!paths.isEmpty()) {
-    output_line_->setText(QDir::toNativeSeparators(paths.at(0)));
+  connect(settings_page_, &SettingsPage::CheckUpdateRequested, this,
+          &MainWindow::ShowCheckWindow);
+}
+
+QString MainWindow::DbPath() const {
+  return settings_->value("Library/Database", AppDataDir()).toString();
+}
+
+void MainWindow::ReloadDatabase() {
+  font_db_.Load(DbPath());
+  library_page_->Refresh();
+  process_page_->RefreshLibraryStatus(library_page_->FontDirs().size());
+}
+
+void MainWindow::ShowPage(int index) {
+  stack_->setCurrentIndex(index);
+  if (nav_group_->button(index) != nullptr) {
+    nav_group_->button(index)->setChecked(true);
   }
 }
 
-void MainWindow::OnFontLineDrop(QList<QString> paths) {
-  for (auto it = paths.begin(); it != paths.end();) {
-    QDir dir(*it);
-
-    if (!dir.exists()) {
-      it = paths.erase(it);
-    } else {
-      ++it;
-    }
-  }
-
-  if (!paths.isEmpty()) {
-    font_line_->clear();
-  } else {
-    return;
-  }
-
-  for (auto it = paths.begin(); it != paths.end(); ++it) {
-    if (it != paths.begin()) {
-      font_line_->insert("; ");
-    }
-
-    font_line_->insert(QDir::toNativeSeparators(*it));
-  }
+void MainWindow::ApplyTheme() {
+  theme::Apply(*qApp, static_cast<theme::Mode>(
+                          settings_->value("General/Theme", 0).toInt()));
+  ui::RefreshIcons(this);
+  process_page_->RefreshTheme();
+  library_page_->RefreshTheme();
+  settings_page_->RefreshTheme();
+  log_panel_->RefreshTheme();
 }
 
-void MainWindow::OnDatabaseLineDrop(QList<QString> paths) {
-  for (auto it = paths.begin(); it != paths.end();) {
-    QDir dir(*it);
-
-    if (!dir.exists()) {
-      it = paths.erase(it);
-    } else {
-      ++it;
-    }
-  }
-
-  if (!paths.isEmpty()) {
-    database_line_->setText(QDir::toNativeSeparators(paths.at(0)));
-  }
+void MainWindow::UpdateLibrary(bool is_rebuild) {
+  log_panel_->BeginRun(is_rebuild ? tr("Rebuilding font library")
+                                  : tr("Updating font library"));
+  emit OnSendBuild(library_page_->FontDirs(), DbPath(), is_rebuild);
 }
 
-void MainWindow::OnBuildButtonPressed() {
-  if (worker_->IsRunning()) {
-    build_button_->setChecked(false);
-    return;
-  }
-
-  auto font_line = font_line_->text().trimmed();
-
-  emit OnSendBuild(font_line, database_line_->text().trimmed());
-}
-
-void MainWindow::OnStartButtonPressed() {
-  if (worker_->IsRunning()) {
-    start_button_->setChecked(false);
-    return;
-  }
-
-  unsigned int brightness = 0;
-  switch (hdr_combo_->currentIndex()) {
-    case 0:
-      brightness = 0;
-      break;
-    case 1:
-      brightness = 100;
-      break;
-    case 2:
-      brightness = 203;
-      break;
-    default:
-      brightness = 0;
-      break;
-  }
-
-  unsigned int num_thread = 1;
-  if (mt_action_->isChecked()) {
-    num_thread = std::thread::hardware_concurrency() + 1;
-  }
-
-  emit OnSendStart(
-      input_line_->text().trimmed(), output_line_->text().trimmed(),
-      font_line_->text().trimmed(), database_line_->text().trimmed(),
-      brightness, subset_checkbox_->isChecked(), embed_checkbox_->isChecked(),
-      rename_checkbox_->isChecked(), combined_action_->isChecked(), num_thread);
-}
-
-void MainWindow::OnReceiveLog(QString msg, ASSFONTS_LOG_LEVEL log_level) {
-  QString log;
-
-  switch (log_level) {
-    case ASSFONTS_INFO:
-      log = "[INFO] ";
-      break;
-
-    case ASSFONTS_WARN:
-      log = "[WARN] ";
-      break;
-
-    case ASSFONTS_ERROR:
-      log = "[ERROR] ";
-      break;
-
-    default:
-      break;
-  }
-
-  log.append(msg);
-
-  log_buffer_.push_back({log_level, log});
-
-  ASSFONTS_LOG_LEVEL show_min_level = ASSFONTS_INFO;
-
-  if (min_info_action_->isChecked()) {
-    show_min_level = ASSFONTS_INFO;
-  } else if (min_warn_action_->isChecked()) {
-    show_min_level = ASSFONTS_WARN;
-  } else if (min_error_action_->isChecked()) {
-    show_min_level = ASSFONTS_ERROR;
-  }
-
-  if (!space_action_->isChecked() && log.isEmpty()) {
-    return;
-  }
-
-  if (log_level < show_min_level) {
-    return;
-  }
-
-  QTextCursor cursor(log_text_->document());
-  cursor.movePosition(QTextCursor::End);
-  cursor.beginEditBlock();
-  cursor.insertText(log);
-  cursor.insertBlock();
-  cursor.endEditBlock();
-  cursor.movePosition(QTextCursor::End);
-  log_text_->setTextCursor(cursor);
-}
-
-void MainWindow::OnClearActionTrigger() {
-  log_buffer_.clear();
-  RefreshLogText();
-}
-
-void MainWindow::OnInfoActionTrigger(bool checked) {
-  if (checked) {
-    min_warn_action_->setChecked(false);
-    min_error_action_->setChecked(false);
-  } else {
-    min_info_action_->setChecked(true);
-  }
-  RefreshLogText();
-}
-
-void MainWindow::OnWarnActionTrigger(bool checked) {
-  if (checked) {
-    min_info_action_->setChecked(false);
-    min_error_action_->setChecked(false);
-  } else {
-    min_warn_action_->setChecked(true);
-  }
-  RefreshLogText();
-}
-
-void MainWindow::OnErrorActionTrigger(bool checked) {
-  if (checked) {
-    min_info_action_->setChecked(false);
-    min_warn_action_->setChecked(false);
-  } else {
-    min_error_action_->setChecked(true);
-  }
-  RefreshLogText();
-}
-
-void MainWindow::OnCheckActionTrigger() {
+void MainWindow::ShowCheckWindow() {
   if (check_window_ == nullptr) {
     check_window_ = new CheckWindow(this);
     check_window_->setAttribute(Qt::WA_DeleteOnClose);
@@ -757,214 +419,112 @@ void MainWindow::OnCheckActionTrigger() {
   check_window_->activateWindow();
 }
 
-void MainWindow::RefreshLogText() {
-  log_text_->setUpdatesEnabled(false);
-  log_text_->clear();
-
-  QTextBlockFormat bf = log_text_->textCursor().blockFormat();
-  bf.setLineHeight(3, QTextBlockFormat::LineDistanceHeight);
-  log_text_->textCursor().setBlockFormat(bf);
-
-  ASSFONTS_LOG_LEVEL show_min_level = ASSFONTS_INFO;
-
-  if (min_info_action_->isChecked()) {
-    show_min_level = ASSFONTS_INFO;
-  } else if (min_warn_action_->isChecked()) {
-    show_min_level = ASSFONTS_WARN;
-  } else if (min_error_action_->isChecked()) {
-    show_min_level = ASSFONTS_ERROR;
+bool MainWindow::ConfirmIdle() {
+  if (!worker_->IsRunning()) {
+    return true;
   }
-
-  QTextCursor cursor(log_text_->document());
-  cursor.beginEditBlock();
-
-  for (auto iter = log_buffer_.begin(); iter != log_buffer_.end(); ++iter) {
-    if (!space_action_->isChecked() && (*iter).text.isEmpty()) {
-      continue;
-    }
-
-    if ((*iter).level < show_min_level) {
-      continue;
-    }
-
-    cursor.insertText((*iter).text);
-    cursor.insertBlock();
-  }
-
-  cursor.endEditBlock();
-  log_text_->setUpdatesEnabled(true);
-
-  cursor.movePosition(QTextCursor::End);
-  log_text_->setTextCursor(cursor);
+  QMessageBox box(QMessageBox::Warning, tr("Still working"),
+                  tr("Please wait until the current task finishes."),
+                  QMessageBox::NoButton, this);
+  box.addButton(tr("OK"), QMessageBox::AcceptRole);
+  box.exec();
+  return false;
 }
 
-void MainWindow::ResizeHelper(QWidget* widget, const int width,
-                              const int height, const bool is_fixed) {
-  QSize hint_size = widget->sizeHint();
-
-  if (width > hint_size.width()) {
-    hint_size.setWidth(width);
+void MainWindow::closeEvent(QCloseEvent* event) {
+  if (!ConfirmIdle()) {
+    event->ignore();
+    return;
   }
 
-  if (height > hint_size.height()) {
-    hint_size.setHeight(height);
+  SaveSettings();
+  event->accept();
+}
+
+void MainWindow::changeEvent(QEvent* event) {
+  if (event->type() == QEvent::ThemeChange &&
+      settings_->value("General/Theme", 0).toInt() == 0) {
+    const bool was_dark = theme::IsDark();
+    theme::Apply(*qApp, theme::Mode::kSystem);
+    if (was_dark != theme::IsDark()) {
+      ApplyTheme();
+    }
   }
 
-  if (is_fixed) {
-    widget->setFixedSize(hint_size);
-  } else {
-    widget->resize(hint_size);
-  }
+  QMainWindow::changeEvent(event);
 }
 
 void MainWindow::LoadSettings() {
-  settings_ = new QSettings(
-      (fs::path(SAVE_FILES_PATH) / "settings.ini").u8string().c_str(),
-      QSettings::IniFormat, this);
-
-  settings_->beginGroup("MainWindow");
-  if (settings_->contains("WSize") && settings_->contains("HSize") &&
-      settings_->contains("WPos") && settings_->contains("HPos")) {
-    int w_size = settings_->value("WSize").toInt();
-    int h_size = settings_->value("HSize").toInt();
-    int w_pos = settings_->value("WPos").toInt();
-    int h_pos = settings_->value("HPos").toInt();
-    resize(w_size, h_size);
-    move(w_pos, h_pos);
-  }
-  settings_->endGroup();
-
-  settings_->beginGroup("InputsText");
-  if (settings_->contains("Input")) {
-    input_line_->setText(settings_->value("Input").toString());
-  }
-  if (settings_->contains("Output")) {
-    output_line_->setText(settings_->value("Output").toString());
-  }
-  if (settings_->contains("Font")) {
-    font_line_->setText(settings_->value("Font").toString());
-  }
-  if (settings_->contains("Database")) {
-    database_line_->setText(settings_->value("Database").toString());
-  }
-  settings_->endGroup();
-
-  settings_->beginGroup("Options");
-  if (settings_->contains("Hdr")) {
-    hdr_combo_->setCurrentIndex(settings_->value("Hdr").toInt());
-  }
-  if (settings_->contains("Subset")) {
-    subset_checkbox_->setChecked(settings_->value("Subset").toBool());
-  }
-  if (settings_->contains("Embed")) {
-    embed_checkbox_->setChecked(settings_->value("Embed").toBool());
-  }
-  if (settings_->contains("Rename")) {
-    rename_checkbox_->setChecked(settings_->value("Rename").toBool());
-  }
-  settings_->endGroup();
-
-  settings_->beginGroup("Menu");
-
-  if (settings_->contains("LogSpace")) {
-    space_action_->setChecked(settings_->value("LogSpace").toBool());
-    RefreshLogText();
+  if (settings_->contains("MainWindow/Geometry")) {
+    restoreGeometry(settings_->value("MainWindow/Geometry").toByteArray());
+  } else {
+    resize(1180, 860);
   }
 
-  if (settings_->contains("LogLevel")) {
-    switch (settings_->value("LogLevel").toInt()) {
-      case 0:
-        min_info_action_->trigger();
-        break;
-      case 1:
-        min_warn_action_->trigger();
-        break;
-      case 2:
-        min_error_action_->trigger();
-        break;
-      default:
-        break;
-    }
-  }
+  const bool is_auto_update =
+      settings_->value("Library/AutoUpdate", true).toBool();
+  process_page_->SetAutoUpdate(is_auto_update);
+  library_page_->SetAutoUpdate(is_auto_update);
 
-  if (settings_->contains("MultiThread")) {
-    mt_action_->setChecked(settings_->value("MultiThread").toBool());
-  }
-
-  if (settings_->contains("CombinedFonts")) {
-    combined_action_->setChecked(settings_->value("CombinedFonts").toBool());
-  }
-
-  settings_->endGroup();
+  log_panel_->SetAutoClear(settings_->value("Log/AutoClear", true).toBool());
+  log_panel_->SetExpanded(settings_->value("Log/Expanded", false).toBool());
 }
 
 void MainWindow::SaveSettings() {
-  settings_->beginGroup("MainWindow");
-  settings_->setValue("WSize", width());
-  settings_->setValue("HSize", height());
-  settings_->setValue("WPos", pos().x());
-  settings_->setValue("HPos", pos().y());
-  settings_->endGroup();
-
-  settings_->beginGroup("InputsText");
-  settings_->setValue("Input", input_line_->text());
-  settings_->setValue("Output", output_line_->text());
-  settings_->setValue("Font", font_line_->text());
-  settings_->setValue("Database", database_line_->text());
-  settings_->endGroup();
-
-  settings_->beginGroup("Options");
-  settings_->setValue("Hdr", hdr_combo_->currentIndex());
-  settings_->setValue("Subset", subset_checkbox_->isChecked());
-  settings_->setValue("Embed", embed_checkbox_->isChecked());
-  settings_->setValue("Rename", rename_checkbox_->isChecked());
-  settings_->endGroup();
-
-  settings_->beginGroup("Menu");
-  settings_->setValue("LogSpace", space_action_->isChecked());
-
-  if (min_info_action_->isChecked()) {
-    settings_->setValue("LogLevel", 0);
-  } else if (min_warn_action_->isChecked()) {
-    settings_->setValue("LogLevel", 1);
-  } else if (min_error_action_->isChecked()) {
-    settings_->setValue("LogLevel", 2);
-  }
-
-  settings_->setValue("MultiThread", mt_action_->isChecked());
-
-  settings_->setValue("CombinedFonts", combined_action_->isChecked());
-  settings_->endGroup();
+  settings_->setValue("MainWindow/Geometry", saveGeometry());
+  settings_->setValue("Log/Expanded", log_panel_->IsExpanded());
+  process_page_->SaveSettings();
+  library_page_->SaveSettings();
+  settings_->sync();
 }
 
-void MainWindow::OnResetActionTrigger() {
-  input_line_->clear();
-  output_line_->clear();
-  font_line_->clear();
+void MainWindow::MigrateOldSettings() {
+  // Settings written by the old single-window UI.
+  if (settings_->contains("InputsText/Database") &&
+      !settings_->contains("Library/Database")) {
+    settings_->setValue("Library/Database",
+                        settings_->value("InputsText/Database"));
+  }
 
-  QDir appdata_dir(QString::fromStdString(SAVE_FILES_PATH));
-  database_line_->setText(QDir::toNativeSeparators(appdata_dir.absolutePath()));
+  if (settings_->contains("InputsText/Font") &&
+      !settings_->contains("Library/Dirs")) {
+    QStringList dirs;
+    for (const auto& dir :
+         settings_->value("InputsText/Font").toString().split(';')) {
+      if (!dir.trimmed().isEmpty() && QDir(dir.trimmed()).exists()) {
+        dirs.append(dir.trimmed());
+      }
+    }
+    settings_->setValue("Library/Dirs", dirs);
+  }
 
-  hdr_combo_->setCurrentIndex(0);
-  subset_checkbox_->setChecked(false);
-  embed_checkbox_->setChecked(false);
-  rename_checkbox_->setChecked(false);
+  if (settings_->contains("Options/Hdr") &&
+      !settings_->contains("Process/Hdr")) {
+    settings_->setValue("Process/Hdr", settings_->value("Options/Hdr"));
+    settings_->setValue("Process/Rename", settings_->value("Options/Rename"));
+    int mode = 0;
+    if (settings_->value("Options/Subset").toBool()) {
+      mode = 1;
+    } else if (settings_->value("Options/Embed").toBool()) {
+      mode = 2;
+    }
+    settings_->setValue("Process/Mode", mode);
+  }
 
-  space_action_->setChecked(true);
+  if (settings_->contains("Menu/MultiThread") &&
+      !settings_->contains("Run/MultiThread")) {
+    settings_->setValue("Run/MultiThread",
+                        settings_->value("Menu/MultiThread"));
+    settings_->setValue("Process/Combined",
+                        settings_->value("Menu/CombinedFonts"));
+  }
 
-  min_info_action_->setChecked(true);
-  min_warn_action_->setChecked(false);
-  min_error_action_->setChecked(false);
-
-  mt_action_->setChecked(false);
-  combined_action_->setChecked(false);
-
-  log_buffer_.clear();
-  QString version_info = "assfonts -- version " +
-                         QString::number(ASSFONTS_VERSION_MAJOR) + "." +
-                         QString::number(ASSFONTS_VERSION_MINOR) + "." +
-                         QString::number(ASSFONTS_VERSION_PATCH);
-  log_buffer_.push_back({ASSFONTS_TEXT, version_info});
-  log_buffer_.push_back({ASSFONTS_TEXT, ""});
-  RefreshLogText();
+  for (const auto& group :
+       {"MainWindow/WSize", "MainWindow/HSize", "MainWindow/WPos",
+        "MainWindow/HPos"}) {
+    settings_->remove(group);
+  }
+  settings_->remove("InputsText");
+  settings_->remove("Options");
+  settings_->remove("Menu");
 }

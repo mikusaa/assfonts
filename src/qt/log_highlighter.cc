@@ -13,54 +13,58 @@
  *
  *  You should have received a copy of the GNU General Public
  *  License along with assfonts. If not, see <https://www.gnu.org/licenses/>.
- *  
+ *
  *  written by wyzdwdz (https://github.com/wyzdwdz)
  */
 
 #include "log_highlighter.h"
 
-#include <QGuiApplication>
-#include <QPalette>
-#include <QStyleHints>
+#include <algorithm>
+
+#include <QTextDocument>
+
+#include "theme.h"
 
 LogHighlighter::LogHighlighter(QTextDocument* parent)
     : QSyntaxHighlighter(parent) {
   SetColor();
-
-  info_expression_ = QRegularExpression("^\\[INFO\\].*$");
-  warn_expression_ = QRegularExpression("^\\[WARN\\].*$");
-  error_expression_ = QRegularExpression("^\\[ERROR\\].*$");
 }
 
 void LogHighlighter::SetColor() {
-  auto hints = QGuiApplication::styleHints();
-  auto scheme = hints->colorScheme();
+  const theme::Palette& p = theme::Current();
 
-  if (scheme == Qt::ColorScheme::Dark) {
-    warn_format_.setForeground(QColorConstants::Svg::lightskyblue);
-    error_format_.setForeground(Qt::yellow);
-  } else {
-    warn_format_.setForeground(Qt::blue);
-    error_format_.setForeground(Qt::red);
-  }
+  info_format_.setForeground(p.info);
+  info_format_.setFontWeight(QFont::DemiBold);
+
+  warn_format_.setForeground(p.warn);
+  warn_format_.setFontWeight(QFont::DemiBold);
+
+  error_format_.setForeground(p.error);
+  error_format_.setFontWeight(QFont::DemiBold);
+
+  text_format_.setForeground(p.text_muted);
+
+  rehighlight();
 }
 
 void LogHighlighter::highlightBlock(const QString& text) {
-  QRegularExpressionMatchIterator i = info_expression_.globalMatch(text);
-  while (i.hasNext()) {
-    QRegularExpressionMatch match = i.next();
-    setFormat(match.capturedStart(), match.capturedLength(), info_format_);
-  }
+  // The level tag runs up to the first double space.
+  const int tag_len = std::max(0, static_cast<int>(text.indexOf("  ")));
 
-  i = warn_expression_.globalMatch(text);
-  while (i.hasNext()) {
-    QRegularExpressionMatch match = i.next();
-    setFormat(match.capturedStart(), match.capturedLength(), warn_format_);
-  }
-
-  i = error_expression_.globalMatch(text);
-  while (i.hasNext()) {
-    QRegularExpressionMatch match = i.next();
-    setFormat(match.capturedStart(), match.capturedLength(), error_format_);
+  switch (currentBlockState()) {
+    case ASSFONTS_INFO:
+      setFormat(0, tag_len, info_format_);
+      break;
+    case ASSFONTS_WARN:
+      setFormat(0, tag_len, warn_format_);
+      break;
+    case ASSFONTS_ERROR:
+      setFormat(0, tag_len, error_format_);
+      break;
+    case ASSFONTS_TEXT:
+      setFormat(0, text.size(), text_format_);
+      break;
+    default:
+      break;
   }
 }
