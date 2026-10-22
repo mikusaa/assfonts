@@ -148,9 +148,14 @@ jobs:
       - name: install cmake
         uses: lukka/get-cmake@latest
 
+      - name: install autotools
+        run: |
+          brew install autoconf autoconf-archive automake libtool
+          # Homebrew installs libtoolize as glibtoolize; vcpkg looks for libtoolize.
+          echo "$(brew --prefix libtool)/libexec/gnubin" >> "$GITHUB_PATH"
+
       - name: build executable binary
         run: |
-          brew install automake autoconf-archive
           cp .github/macos/CMakeUserPresets.json .
           cmake . --preset macos-${{ matrix.profile }}
           cmake --build --preset macos-${{ matrix.profile }}-release --target package -j
