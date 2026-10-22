@@ -63,6 +63,11 @@
             ]
         },
         {
+            "name": "qtbase",
+            "host": true,
+            "default-features": false
+        },
+        {
             "name": "qtwayland",
             "platform": "linux",
             "host": true

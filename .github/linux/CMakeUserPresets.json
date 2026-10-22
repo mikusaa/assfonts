@@ -96,7 +96,9 @@
         "CMAKE_FIND_ROOT_PATH_MODE_LIBRARY": "ONLY",
         "CMAKE_FIND_ROOT_PATH_MODE_PACKAGE": "ONLY",
         "CMAKE_FIND_ROOT_PATH_MODE_INCLUDE": "BOTH",
-        "CMAKE_CROSSCOMPILING": "ON"
+        "CMAKE_CROSSCOMPILING": "ON",
+        "CMAKE_C_FLAGS": "-fPIC -msse2",
+        "CMAKE_CXX_FLAGS": "-fPIC -msse2"
       },
       "architecture": {
         "value": "x86",
