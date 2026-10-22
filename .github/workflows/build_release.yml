@@ -34,6 +34,7 @@ jobs:
           shell: bash
           run: |
             source ~/.bashrc
+            set -e
             cd /var/www
             cp ./.github/linux/CMakeUserPresets.json .
             cmake . --preset linux-${{ matrix.profile }}
@@ -62,6 +63,26 @@ jobs:
         with:
           name: linux-${{ matrix.profile }}-issue
           path: out/build/linux-${{ matrix.profile }}/vcpkg_installed/vcpkg/issue_body.md
+
+      - name: show failed dependency logs
+        if: failure()
+        shell: bash
+        run: |
+          # vcpkg keeps each dependency's build output under buildtrees; the
+          # newest logs belong to the dependency that failed.
+          logs=$(find vcpkg/buildtrees -maxdepth 2 -name '*.log' -size +0 2>/dev/null)
+          [ -z "$logs" ] && exit 0
+          ls -t $logs | head -n 6 | while read -r f; do
+            echo "::group::$f"; tail -n 120 "$f"; echo "::endgroup::"
+          done
+
+      - name: upload dependency build logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-${{ matrix.profile }}-vcpkg-logs
+          path: vcpkg/buildtrees/**/*.log
+          if-no-files-found: ignore
 
   build-windows:
     runs-on: windows-2022
@@ -126,6 +147,26 @@ jobs:
         with:
           name: windows-${{ matrix.profile }}-issue
           path: out/build/windows-${{ matrix.profile }}/vcpkg_installed/vcpkg/issue_body.md
+
+      - name: show failed dependency logs
+        if: failure()
+        shell: bash
+        run: |
+          # vcpkg keeps each dependency's build output under buildtrees; the
+          # newest logs belong to the dependency that failed.
+          logs=$(find vcpkg/buildtrees -maxdepth 2 -name '*.log' -size +0 2>/dev/null)
+          [ -z "$logs" ] && exit 0
+          ls -t $logs | head -n 6 | while read -r f; do
+            echo "::group::$f"; tail -n 120 "$f"; echo "::endgroup::"
+          done
+
+      - name: upload dependency build logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-${{ matrix.profile }}-vcpkg-logs
+          path: vcpkg/buildtrees/**/*.log
+          if-no-files-found: ignore
           
   build-macos:
     # Intel builds on an Intel runner, Apple Silicon natively on an M-series one.
@@ -177,6 +218,26 @@ jobs:
         with:
           name: macos-${{ matrix.profile }}-issue
           path: out/build/macos-${{ matrix.profile }}/vcpkg_installed/vcpkg/issue_body.md
+
+      - name: show failed dependency logs
+        if: failure()
+        shell: bash
+        run: |
+          # vcpkg keeps each dependency's build output under buildtrees; the
+          # newest logs belong to the dependency that failed.
+          logs=$(find vcpkg/buildtrees -maxdepth 2 -name '*.log' -size +0 2>/dev/null)
+          [ -z "$logs" ] && exit 0
+          ls -t $logs | head -n 6 | while read -r f; do
+            echo "::group::$f"; tail -n 120 "$f"; echo "::endgroup::"
+          done
+
+      - name: upload dependency build logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-${{ matrix.profile }}-vcpkg-logs
+          path: vcpkg/buildtrees/**/*.log
+          if-no-files-found: ignore
           
   release:
     runs-on: ubuntu-22.04
