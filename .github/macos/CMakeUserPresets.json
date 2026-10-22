@@ -14,7 +14,6 @@
         "CMAKE_EXPORT_COMPILE_COMMANDS": "true",
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
         "CMAKE_SYSTEM_NAME": "Darwin",
-        "VCPKG_HOST_TRIPLET": "x64-osx-release",
         "CMAKE_C_FLAGS": "-fPIC",
         "CMAKE_CXX_FLAGS": "-fPIC"
       }
@@ -26,7 +25,8 @@
         "VCPKG_TARGET_TRIPLET": "x64-osx-release",
         "CMAKE_SYSTEM_PROCESSOR": "x86_64",
         "CMAKE_OSX_ARCHITECTURES": "x86_64",
-        "CMAKE_CROSSCOMPILING": "OFF"
+        "CMAKE_CROSSCOMPILING": "OFF",
+        "VCPKG_HOST_TRIPLET": "x64-osx-release"
       },
       "architecture": {
         "value": "x64",
@@ -40,7 +40,8 @@
         "VCPKG_TARGET_TRIPLET": "arm64-osx-release",
         "CMAKE_SYSTEM_PROCESSOR": "arm64",
         "CMAKE_OSX_ARCHITECTURES": "arm64",
-        "CMAKE_CROSSCOMPILING": "ON"
+        "CMAKE_CROSSCOMPILING": "OFF",
+        "VCPKG_HOST_TRIPLET": "arm64-osx-release"
       },
       "architecture": {
         "value": "arm64",

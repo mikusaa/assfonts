@@ -128,7 +128,8 @@ jobs:
           path: out/build/windows-${{ matrix.profile }}/vcpkg_installed/vcpkg/issue_body.md
           
   build-macos:
-    runs-on: macos-15-intel
+    # Intel builds on an Intel runner, Apple Silicon natively on an M-series one.
+    runs-on: ${{ matrix.runner }}
     defaults:
       run:
         shell: bash
@@ -136,8 +137,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { arch: x86_64, profile: x64 }
-          - { arch: aarch64, profile: arm64 }
+          - { arch: x86_64, profile: x64, runner: macos-15-intel }
+          - { arch: aarch64, profile: arm64, runner: macos-15 }
     steps:
       - name: checkout
         uses: actions/checkout@v4
