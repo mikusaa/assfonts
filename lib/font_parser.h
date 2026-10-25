@@ -75,6 +75,18 @@ class FontParser {
     int slant = 0;
     long index = 0;
     std::string last_write_time;
+    // Hash of the table directory records of the glyph tables. Faces with the
+    // same glyph_hash draw the same, whatever their names say.
+    std::string glyph_hash;
+    // Hash of every table directory record; equal for identical faces.
+    std::string face_hash;
+    std::string version;
+    double revision = 0;
+    std::string vendor;
+    long num_glyphs = 0;
+    // False for entries from a database written before the fields above
+    // existed, so the next update reads the file again.
+    bool is_complete = true;
   };
 
   std::shared_ptr<Logger> logger_;
@@ -102,7 +114,9 @@ class FontParser {
   void ParseFontName(const FT_Face& ft_face, const unsigned int name_idx,
                      std::vector<std::string>& families,
                      std::vector<std::string>& fullnames,
-                     std::vector<std::string>& psnames);
+                     std::vector<std::string>& psnames, std::string& version);
+  bool HashTableDirectory(const AString& font_path, const long face_idx,
+                          std::string& glyph_hash, std::string& face_hash);
   int AssFaceGetWeight(const FT_Face& face);
   bool ExistInDB(
       const AString& font_path, std::string& last_write_time,

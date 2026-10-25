@@ -20,6 +20,8 @@
 #include "font_parser.h"
 
 #include <algorithm>
+#include <cstdint>
+#include <cstdio>
 #include <exception>
 #include <fstream>
 #include <future>
@@ -221,6 +223,12 @@ void FontParser::SaveDB(const AString& db_path) {
 #endif
     js_font["index"] = font.second.index;
     js_font["last_write_time"] = font.second.last_write_time;
+    js_font["glyph_hash"] = font.second.glyph_hash;
+    js_font["face_hash"] = font.second.face_hash;
+    js_font["version"] = font.second.version;
+    js_font["revision"] = font.second.revision;
+    js_font["vendor"] = font.second.vendor;
+    js_font["num_glyphs"] = font.second.num_glyphs;
 
     json.emplace_back(js_font);
   }
@@ -271,6 +279,13 @@ void FontParser::LoadDB(const AString& db_path) {
 #endif
       font.second.index = js_font["index"];
       font.second.last_write_time = js_font["last_write_time"];
+      font.second.is_complete = js_font.contains("glyph_hash");
+      font.second.glyph_hash = js_font.value("glyph_hash", "");
+      font.second.face_hash = js_font.value("face_hash", "");
+      font.second.version = js_font.value("version", "");
+      font.second.revision = js_font.value("revision", 0.0);
+      font.second.vendor = js_font.value("vendor", "");
+      font.second.num_glyphs = js_font.value("num_glyphs", 0L);
       font_list_in_db_.emplace(font);
     }
   } catch (const nlohmann::json::exception&) {
@@ -379,6 +394,7 @@ void FontParser::GetFontInfoFromFace(
   std::vector<std::string> families;
   std::vector<std::string> fullnames;
   std::vector<std::string> psnames;
+  std::string version;
 
   if (FT_Open_Face(ft_library, &open_args, face_idx, &ft_face)) {
     return;
@@ -394,7 +410,7 @@ void FontParser::GetFontInfoFromFace(
 
   const unsigned int num_names = FT_Get_Sfnt_Name_Count(ft_face);
   for (unsigned int name_idx = 0; name_idx < num_names; ++name_idx) {
-    ParseFontName(ft_face, name_idx, families, fullnames, psnames);
+    ParseFontName(ft_face, name_idx, families, fullnames, psnames, version);
   }
 
   if (families.empty() && fullnames.empty() && psnames.empty()) {
@@ -424,6 +440,27 @@ void FontParser::GetFontInfoFromFace(
 
   font_info.second.last_write_time = last_write_time;
 
+  font_info.second.version = version;
+
+  const auto* head =
+      static_cast<TT_Header*>(FT_Get_Sfnt_Table(ft_face, FT_SFNT_HEAD));
+  if (head != nullptr) {
+    font_info.second.revision = head->Font_Revision / 65536.0;
+  }
+
+  const auto* os2 =
+      static_cast<TT_OS2*>(FT_Get_Sfnt_Table(ft_face, FT_SFNT_OS2));
+  if (os2 != nullptr) {
+    std::string vendor(reinterpret_cast<const char*>(os2->achVendID), 4);
+    vendor.erase(vendor.find_last_not_of(std::string(" \0", 2)) + 1);
+    font_info.second.vendor = vendor;
+  }
+
+  font_info.second.num_glyphs = ft_face->num_glyphs;
+
+  HashTableDirectory(font_path, face_idx, font_info.second.glyph_hash,
+                     font_info.second.face_hash);
+
   font_list.emplace(font_info);
 }
 
@@ -431,7 +468,8 @@ void FontParser::ParseFontName(const FT_Face& ft_face,
                                const unsigned int name_idx,
                                std::vector<std::string>& families,
                                std::vector<std::string>& fullnames,
-                               std::vector<std::string>& psnames) {
+                               std::vector<std::string>& psnames,
+                               std::string& version) {
   FT_SfntName name;
   std::string wbuf;
   std::string buf;
@@ -442,7 +480,8 @@ void FontParser::ParseFontName(const FT_Face& ft_face,
 
   if (name.name_id != TT_NAME_ID_FULL_NAME &&
       name.name_id != TT_NAME_ID_FONT_FAMILY &&
-      name.name_id != TT_NAME_ID_PS_NAME) {
+      name.name_id != TT_NAME_ID_PS_NAME &&
+      name.name_id != TT_NAME_ID_VERSION_STRING) {
     return;
   }
 
@@ -495,6 +534,13 @@ void FontParser::ParseFontName(const FT_Face& ft_face,
     buf.erase(last_none_zero + 1);
   }
 
+  if (name.name_id == TT_NAME_ID_VERSION_STRING) {
+    if (version.empty()) {
+      version = buf;
+    }
+    return;
+  }
+
   // Names are stored lowercased, so they must be compared lowercased too, or
   // every name record with capitals is added once more.
   const std::string lower = ToLower(buf);
@@ -524,6 +570,112 @@ void FontParser::ParseFontName(const FT_Face& ft_face,
     default:
       break;
   }
+}
+
+bool FontParser::HashTableDirectory(const AString& font_path,
+                                    const long face_idx,
+                                    std::string& glyph_hash,
+                                    std::string& face_hash) {
+  // Only the table directory is read: each record carries the table's
+  // checksum and length, which tell tables apart without reading them.
+  std::ifstream file(font_path, std::ios::binary);
+  if (!file.is_open()) {
+    return false;
+  }
+
+  auto read_u32 = [&file](uint32_t& value) {
+    unsigned char bytes[4];
+    if (!file.read(reinterpret_cast<char*>(bytes), 4)) {
+      return false;
+    }
+    value = (uint32_t(bytes[0]) << 24) | (uint32_t(bytes[1]) << 16) |
+            (uint32_t(bytes[2]) << 8) | uint32_t(bytes[3]);
+    return true;
+  };
+
+  uint32_t tag = 0;
+  uint32_t offset = 0;
+  if (!read_u32(tag)) {
+    return false;
+  }
+  if (tag == 0x74746366) {  // 'ttcf'
+    uint32_t num_fonts = 0;
+    file.seekg(8);
+    if (!read_u32(num_fonts) || face_idx >= static_cast<long>(num_fonts)) {
+      return false;
+    }
+    file.seekg(12 + 4 * face_idx);
+    if (!read_u32(offset)) {
+      return false;
+    }
+  } else if (face_idx != 0) {
+    return false;
+  }
+
+  uint32_t num_tables = 0;
+  file.seekg(offset + 4);
+  if (!read_u32(num_tables)) {
+    return false;
+  }
+  num_tables >>= 16;
+
+  struct Record {
+    uint32_t tag;
+    uint32_t checksum;
+    uint32_t length;
+  };
+  std::vector<Record> records;
+  for (uint32_t idx = 0; idx < num_tables; ++idx) {
+    Record record = {};
+    uint32_t table_offset = 0;
+    file.seekg(offset + 12 + 16 * idx);
+    if (!read_u32(record.tag) || !read_u32(record.checksum) ||
+        !read_u32(table_offset) || !read_u32(record.length)) {
+      return false;
+    }
+    records.emplace_back(record);
+  }
+  std::sort(records.begin(), records.end(),
+            [](const Record& a, const Record& b) { return a.tag < b.tag; });
+
+  // Outlines, bitmaps, character map and advance widths. Renaming a font
+  // leaves these alone.
+  static const std::vector<std::string> kGlyphTables = {
+      "glyf", "CFF ", "CFF2", "EBDT", "CBDT", "sbix", "SVG ", "cmap", "hmtx"};
+
+  auto fnv = [](uint64_t hash, uint32_t value) {
+    for (int shift = 24; shift >= 0; shift -= 8) {
+      hash ^= (value >> shift) & 0xff;
+      hash *= 0x100000001b3ULL;
+    }
+    return hash;
+  };
+
+  uint64_t glyph = 0xcbf29ce484222325ULL;
+  uint64_t face = 0xcbf29ce484222325ULL;
+  for (const auto& record : records) {
+    const std::string name = {char(record.tag >> 24), char(record.tag >> 16),
+                              char(record.tag >> 8), char(record.tag)};
+    // A signature changes with any edit, so it says nothing about content.
+    if (name != "DSIG") {
+      face = fnv(fnv(fnv(face, record.tag), record.checksum), record.length);
+    }
+    if (std::find(kGlyphTables.begin(), kGlyphTables.end(), name) !=
+        kGlyphTables.end()) {
+      glyph = fnv(fnv(fnv(glyph, record.tag), record.checksum), record.length);
+    }
+  }
+
+  auto to_hex = [](uint64_t value) {
+    char buf[17];
+    snprintf(buf, sizeof(buf), "%016llx",
+             static_cast<unsigned long long>(value));
+    return std::string(buf);
+  };
+
+  glyph_hash = to_hex(glyph);
+  face_hash = to_hex(face);
+  return true;
 }
 
 int FontParser::AssFaceGetWeight(const FT_Face& face) {
@@ -592,7 +744,8 @@ bool FontParser::ExistInDB(
     return false;
   }
 
-  if (iters_found[0]->second.last_write_time == last_write_time) {
+  if (iters_found[0]->second.last_write_time == last_write_time &&
+      iters_found[0]->second.is_complete) {
     return true;
   } else {
     return false;
