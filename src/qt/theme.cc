@@ -110,6 +110,7 @@ QPushButton[kind="primary"] {
   min-height: 38px; padding: 0 20px; border: 0; border-radius: 10px;
   background: @accent; color: @accent_text; font-weight: 700;
 }
+QPushButton[tall="true"] { min-height: 36px; }
 QPushButton[kind="primary"]:hover { background: @accent_hover; }
 QPushButton[kind="primary"]:disabled { background: @border_strong; color: @card; }
 QPushButton[kind="ghost"] { border: 0; background: transparent; min-width: 30px; padding: 0 6px; }

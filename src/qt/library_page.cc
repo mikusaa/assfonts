@@ -125,7 +125,7 @@ QWidget* LibraryPage::InitHeader() {
   rebuild_button_ = ui::Button(tr("Rebuild from scratch"));
   rebuild_button_->setToolTip(
       tr("Forget everything and read all font files again"));
-  rebuild_button_->setMinimumHeight(38);
+  rebuild_button_->setProperty("tall", true);
   update_button_ = ui::Button(tr("Update library"), "primary", "refresh");
   hlayout->addWidget(rebuild_button_, 0, Qt::AlignBottom);
   hlayout->addWidget(update_button_, 0, Qt::AlignBottom);
