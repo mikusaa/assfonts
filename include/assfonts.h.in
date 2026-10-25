@@ -60,6 +60,19 @@ char* AssfontsCheck(const char** input_paths, const unsigned int num_paths,
                     const char* db_path, const AssfontsLogCallback cb,
                     const enum ASSFONTS_LOG_LEVEL log_level);
 
+// Same as AssfontsCheck, but looks only at the fonts in the given folders
+// (no database, no system fonts), e.g. a font pack shipped with a subtitle.
+char* AssfontsCheckFonts(const char** input_paths, const unsigned int num_paths,
+                         const char** fonts_paths, const unsigned int num_fonts,
+                         const AssfontsLogCallback cb,
+                         const enum ASSFONTS_LOG_LEVEL log_level);
+
+// Parses the given font files and adds them to the fonts database, replacing
+// what it held for the same paths. Other entries are kept as they are.
+void AssfontsAddFonts(const char** font_files, const unsigned int num_files,
+                      const char* db_path, const AssfontsLogCallback cb,
+                      const enum ASSFONTS_LOG_LEVEL log_level);
+
 void AssfontsFreeString(char* str);
 }
 

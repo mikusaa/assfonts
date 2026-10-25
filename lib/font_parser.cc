@@ -163,6 +163,30 @@ void FontParser::LoadFonts(std::vector<AString> fonts_dirs, bool with_default) {
   }
 }
 
+void FontParser::AddFontFiles(const std::vector<AString>& font_files) {
+  font_list_ = font_list_in_db_;
+
+  for (const AString& font_path : font_files) {
+    font_list_.erase(font_path);
+  }
+
+  ThreadPool pool(std::thread::hardware_concurrency() + 1);
+  std::vector<std::future<std::unordered_multimap<AString, FontInfo>>> results;
+
+  for (const AString& font_path : font_files) {
+    results.emplace_back(
+        pool.enqueue([this, font_path]() { return GetFontInfo(font_path); }));
+  }
+
+  for (auto&& result : results) {
+    auto font_list = result.get();
+    font_list_.insert(font_list.begin(), font_list.end());
+  }
+
+  logger_->Info(_ST("Added {} font files to the fonts database."),
+                font_files.size());
+}
+
 void FontParser::SaveDB(const AString& db_path) {
   if (font_list_.size() == 0) {
     logger_->Warn(_ST("No font is found. Nothing to save."));
@@ -217,15 +241,27 @@ void FontParser::LoadDB(const AString& db_path) {
     return;
   }
 
+  // Older databases may hold the same name more than once in a list.
+  auto unique_names = [](const nlohmann::json& js_names) {
+    std::vector<std::string> names;
+    for (const auto& js_name : js_names) {
+      const std::string name = js_name;
+      if (std::find(names.begin(), names.end(), name) == names.end()) {
+        names.emplace_back(name);
+      }
+    }
+    return names;
+  };
+
   try {
     nlohmann::json json;
     db_file >> json;
 
     for (const nlohmann::json& js_font : json) {
       std::pair<AString, FontInfo> font;
-      font.second.families = js_font["families"];
-      font.second.fullnames = js_font["fullnames"];
-      font.second.psnames = js_font["psnames"];
+      font.second.families = unique_names(js_font["families"]);
+      font.second.fullnames = unique_names(js_font["fullnames"]);
+      font.second.psnames = unique_names(js_font["psnames"]);
       font.second.weight = js_font["weight"];
       font.second.slant = js_font["slant"];
 #ifdef _WIN32
@@ -459,37 +495,30 @@ void FontParser::ParseFontName(const FT_Face& ft_face,
     buf.erase(last_none_zero + 1);
   }
 
-  if (buf.empty()) {
+  // Names are stored lowercased, so they must be compared lowercased too, or
+  // every name record with capitals is added once more.
+  const std::string lower = ToLower(buf);
+  if (lower.empty() || lower == "undefined") {
     return;
   }
 
+  auto add_name = [&lower](std::vector<std::string>& names) {
+    if (std::find(names.begin(), names.end(), lower) == names.end()) {
+      names.emplace_back(lower);
+    }
+  };
+
   switch (name.name_id) {
     case TT_NAME_ID_FONT_FAMILY:
-      if (std::find(families.begin(), families.end(), buf) == families.end()) {
-        std::string family = ToLower(buf);
-        if (!family.empty() && family != "undefined") {
-          families.emplace_back(family);
-        }
-      }
+      add_name(families);
       break;
 
     case TT_NAME_ID_FULL_NAME:
-      if (std::find(fullnames.begin(), fullnames.end(), buf) ==
-          fullnames.end()) {
-        std::string fullname = ToLower(buf);
-        if (!fullname.empty() && fullname != "undefined") {
-          fullnames.emplace_back(fullname);
-        }
-      }
+      add_name(fullnames);
       break;
 
     case TT_NAME_ID_PS_NAME:
-      if (std::find(psnames.begin(), psnames.end(), buf) == psnames.end()) {
-        std::string psname = ToLower(buf);
-        if (!psname.empty() && psname != "undefined") {
-          psnames.emplace_back(psname);
-        }
-      }
+      add_name(psnames);
       break;
 
     default:
