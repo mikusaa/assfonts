@@ -100,6 +100,13 @@ void FontDatabase::Load(const QString& db_dir) {
     font.weight = obj.value("weight").toInt(400);
     font.slant = obj.value("slant").toInt(0);
     font.path = QDir::toNativeSeparators(obj.value("path").toString());
+    font.index = obj.value("index").toInt();
+    font.glyph_hash = obj.value("glyph_hash").toString();
+    font.face_hash = obj.value("face_hash").toString();
+    font.version = obj.value("version").toString();
+    font.revision = obj.value("revision").toDouble();
+    font.vendor = obj.value("vendor").toString();
+    font.num_glyphs = obj.value("num_glyphs").toInt();
 
     for (const auto& family : font.families) {
       families.insert(family.toLower());

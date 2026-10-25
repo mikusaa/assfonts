@@ -32,6 +32,7 @@
 #include <QScrollArea>
 #include <QtConcurrent>
 
+#include "duplicates_dialog.h"
 #include "log_translator.h"
 #include "theme.h"
 
@@ -83,6 +84,7 @@ LibraryPage::LibraryPage(QSettings* settings, const FontDatabase* font_db,
   layout->addWidget(InitHeader());
   layout->addWidget(InitStats());
   layout->addWidget(InitDirsCard());
+  layout->addWidget(InitDupesCard());
   layout->addWidget(InitSearchCard());
 
   db_path_label_ = ui::Label(QString(), "caption");
@@ -220,6 +222,36 @@ QWidget* LibraryPage::InitDirsCard() {
   return card;
 }
 
+QWidget* LibraryPage::InitDupesCard() {
+  QVBoxLayout* layout = nullptr;
+  QFrame* card = ui::Card(&layout, 16, 8);
+
+  auto* header = new QHBoxLayout;
+  header->setSpacing(8);
+  header->addWidget(ui::Label(tr("Duplicates and name conflicts"), "h2"));
+  dupes_chips_layout_ = new QHBoxLayout;
+  dupes_chips_layout_->setSpacing(6);
+  header->addLayout(dupes_chips_layout_);
+  header->addStretch();
+  dupes_button_ = ui::Button(tr("View report"));
+  header->addWidget(dupes_button_);
+  layout->addLayout(header);
+
+  dupes_summary_label_ = ui::Label(QString(), "caption");
+  dupes_summary_label_->setWordWrap(true);
+  layout->addWidget(dupes_summary_label_);
+
+  connect(dupes_button_, &QPushButton::clicked, this, [this]() {
+    DuplicatesDialog dialog(font_db_, dupes_report_, dirs_, settings_, this);
+    dialog.exec();
+    if (dialog.HasMoved()) {
+      emit RequestBuild(false);
+    }
+  });
+
+  return card;
+}
+
 QWidget* LibraryPage::InitSearchCard() {
   QVBoxLayout* layout = nullptr;
   QFrame* card = ui::Card(&layout, 0, 0);
@@ -318,6 +350,53 @@ void LibraryPage::Refresh() {
 
   RebuildDirs();
   RunSearch();
+  RefreshDupes();
+}
+
+void LibraryPage::RefreshDupes() {
+  using duplicates::Kind;
+
+  dupes_report_ =
+      duplicates::Find(font_db_->Fonts(), FontDatabase::SystemFontDirs());
+
+  while (QLayoutItem* item = dupes_chips_layout_->takeAt(0)) {
+    delete item->widget();
+    delete item;
+  }
+
+  QHash<int, int> counts;
+  for (const auto& group : dupes_report_.groups) {
+    ++counts[static_cast<int>(group.kind)];
+  }
+  const QVector<QPair<Kind, QPair<QString, QString>>> chips = {
+      {Kind::kConflict, {tr("%n conflict(s)", "", counts.value(0)), "error"}},
+      {Kind::kVersions, {tr("%n with versions", "", counts.value(1)), "warn"}},
+      {Kind::kRepackaged, {tr("%n renamed", "", counts.value(2)), "info"}},
+      {Kind::kIdentical,
+       {tr("%n identical", "", counts.value(3)), "neutral"}}};
+  for (const auto& chip : chips) {
+    if (counts.value(static_cast<int>(chip.first)) > 0) {
+      dupes_chips_layout_->addWidget(
+          ui::Chip(chip.second.first, chip.second.second));
+    }
+  }
+
+  QString summary;
+  if (font_db_->IsEmpty()) {
+    summary = tr("Checked after the library is built.");
+  } else if (dupes_report_.groups.isEmpty()) {
+    summary = tr("No duplicates or name conflicts found.");
+  } else {
+    summary = tr("Name conflicts can make a subtitle get the wrong font. "
+                 "Identical copies can be moved out of the library.");
+  }
+  if (dupes_report_.num_unchecked > 0) {
+    summary += " " + tr("%n font(s) were read by an older version and are "
+                        "not checked. Update the library to include them.",
+                        "", dupes_report_.num_unchecked);
+  }
+  dupes_summary_label_->setText(summary);
+  dupes_button_->setEnabled(!dupes_report_.groups.isEmpty());
 }
 
 void LibraryPage::SetBusy(bool is_busy) {

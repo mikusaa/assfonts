@@ -85,6 +85,55 @@ ZH_CN = {
         "只复制文件，不改动字体包。复制的字体会加入字体库，然后重新检查字幕。",
     "Cancel": "取消",
     "Import %n file(s)": "导入 %n 个文件",
+    # Duplicates
+    "Duplicates and name conflicts": "重复与名称冲突",
+    "View report": "查看报告",
+    "%n conflict(s)": "%n 个冲突",
+    "%n with versions": "%n 个多版本",
+    "%n renamed": "%n 个改名副本",
+    "%n identical": "%n 个完全相同",
+    "Checked after the library is built.": "建好字体库后才会检查。",
+    "No duplicates or name conflicts found.": "没有发现重复或名称冲突。",
+    "Name conflicts can make a subtitle get the wrong font. Identical copies "
+    "can be moved out of the library.":
+        "名称冲突可能让字幕用错字体。完全相同的副本可以移出字体库。",
+    "%n font(s) were read by an older version and are not checked. Update "
+    "the library to include them.":
+        "有 %n 个字体是旧版本读取的，尚未检查。更新字体库后会一并检查。",
+    "Name conflict": "名称冲突",
+    "Versions": "多版本",
+    "Renamed copy": "改名副本",
+    "Identical": "完全相同",
+    "Different fonts answer to the same name. A subtitle asking for it may "
+    "get either one. Keep the right one in the library.":
+        "不同的字体用了同一个名字，字幕要这个名字时可能拿到其中任意一个。"
+        "请只在字体库里保留正确的那个。",
+    "Releases of the same font. A subtitle may get the older one; the newest "
+    "usually has more characters.":
+        "同一字体的不同版本。字幕可能拿到旧版，而新版通常字更全。",
+    "The same glyphs with other names or details. Subtitles may ask for any "
+    "of the names, so keep them unless you are sure.":
+        "字形相同，但名字或其他信息不同。字幕可能用到其中任何一个名字，"
+        "没把握就都留着。",
+    "The same font in several files. One copy is enough.":
+        "同一个字体存了好几份，留一份就够了。",
+    "Show": "显示",
+    "Picked files are moved to a folder you choose, outside the library. "
+    "Fonts in system folders cannot be moved here.":
+        "勾选的文件会移动到你指定的字体库外的文件夹。系统字体文件夹里的字体不能在这里移动。",
+    "Close": "关闭",
+    "Shared names: %1": "共用的名字：%1",
+    "In a system font folder": "位于系统字体文件夹",
+    "Keep": "建议保留",
+    "System": "系统",
+    "%n glyph(s)": "%n 个字形",
+    "file holds %n font(s)": "文件内含 %n 个字体",
+    "Show in folder": "在文件夹中显示",
+    "Move %n file(s)…": "移动 %n 个文件…",
+    "Choose where to move the files": "选择把文件移动到哪里",
+    "Choose a folder outside the font library and the system font folders.":
+        "请选择字体库和系统字体文件夹以外的文件夹。",
+    "These files could not be moved:\n%1": "以下文件无法移动：\n%1",
     "Importing %n font file(s)": "导入 %n 个字体文件",
     "Searching the font pack…": "正在查找字体包…",
     "Importing fonts…": "正在导入字体…",

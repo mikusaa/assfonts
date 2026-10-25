@@ -20,6 +20,8 @@ set(TARGET_SOURCES main.cc
                    widgets.cc
                    font_db.cc
                    pack_dialog.cc
+                   duplicates.cc
+                   duplicates_dialog.cc
                    log_translator.cc
                    log_panel.cc
                    process_page.cc
