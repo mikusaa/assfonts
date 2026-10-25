@@ -255,6 +255,9 @@ jobs:
         shell: bash
     needs: [ build-linux, build-windows, build-macos ]
     if: github.event_name == 'release'
+    # The repository's default token is read-only; uploading assets needs write.
+    permissions:
+      contents: write
     steps:
       - name: checkout
         uses: actions/checkout@v4
