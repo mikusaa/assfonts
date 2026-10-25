@@ -64,7 +64,8 @@ class TaskRunner : public QObject {
                    const QString db_path);
 
   // `outputs` holds the output folder of each input. Options: db_path,
-  // brightness, subset_only, embed_only, rename, combined, multi_thread,
+  // brightness, subset_only, embed_only, rename, combined, non_ttf_quiet,
+  // multi_thread,
   // update_db and fonts_dirs (used when update_db is set).
   void OnStartRun(const QStringList inputs, const QStringList outputs,
                   const QVariantMap options);

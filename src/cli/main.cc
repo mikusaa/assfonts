@@ -140,6 +140,7 @@ int main(int argc, char** argv) {
   bool is_rename = false;
   bool is_help = false;
   bool is_font_combined = false;
+  bool is_non_ttf_quiet = false;
 
   unsigned int brightness = 0;
   unsigned int num_thread = 1;
@@ -176,6 +177,9 @@ int main(int argc, char** argv) {
 
   app.add_flag("-c,--font-combined", is_font_combined,
                "Combine fonts with the same fontname together");
+
+  app.add_flag("--quiet-non-ttf", is_non_ttf_quiet,
+               "Do not warn about embedding non-TTF (e.g. .otf) fonts");
 
   auto* p_opt_v = app.add_option("-v,--verbose", verbose, "Set logging level.");
 
@@ -247,6 +251,7 @@ int main(int argc, char** argv) {
     << "                                (Default: <cpu_count> + 1)\n"
     << "  -c, --font-combined <bool>    !!Experimental!! When there are multiple input files, combine the\n"
     << "                                subsetted fonts with the same fontname together (Default: False)\n"
+    << "      --quiet-non-ttf <bool>    Do not warn about embedding non-TTF (e.g. .otf) fonts (Default: False)\n"
     << "  -v, --verbose       <num>     Set logging level (0 to 3), 0 is off  (Default: 3)\n"
     << "  -h, --help                    Get help info\n" << std::endl;
     // clang-format on
@@ -309,8 +314,8 @@ int main(int argc, char** argv) {
   AssfontsRun(const_cast<const char**>(inputs_char_list.get()), inputs.size(),
               output.c_str(), const_cast<const char**>(fonts_char_list.get()),
               fonts.size(), database.c_str(), brightness, is_subset_only,
-              is_embed_only, is_rename, is_font_combined, num_thread,
-              log_callback, max_log_level);
+              is_embed_only, is_rename, is_font_combined, is_non_ttf_quiet,
+              num_thread, log_callback, max_log_level);
 
   return 0;
 }

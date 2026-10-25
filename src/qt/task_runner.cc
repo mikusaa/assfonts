@@ -249,6 +249,7 @@ void TaskRunner::OnStartRun(const QStringList inputs,
   const bool is_rename = options.value("rename").toBool();
   const bool is_combined = options.value("combined").toBool();
   const bool is_multi_thread = options.value("multi_thread").toBool();
+  const bool is_non_ttf_quiet = options.value("non_ttf_quiet").toBool();
 
   if (options.value("update_db").toBool()) {
     emit OnSendBusy(true, tr("Updating fonts database…"));
@@ -282,7 +283,7 @@ void TaskRunner::OnStartRun(const QStringList inputs,
       AssfontsRun(c_inputs.data(), c_inputs.size(),
                   it.key().toUtf8().constData(), no_fonts, 0,
                   db_bytes.constData(), brightness, is_subset_only,
-                  is_embed_only, is_rename, true,
+                  is_embed_only, is_rename, true, is_non_ttf_quiet,
                   is_multi_thread ? std::thread::hardware_concurrency() : 1,
                   log_callback, ASSFONTS_INFO);
       g_job = nullptr;
@@ -308,8 +309,8 @@ void TaskRunner::OnStartRun(const QStringList inputs,
       const char* input_ptr[] = {input_bytes.constData()};
       AssfontsRun(input_ptr, 1, outputs.at(idx).toUtf8().constData(),
                   no_fonts, 0, db_bytes.constData(), brightness,
-                  is_subset_only, is_embed_only, is_rename, false, 1,
-                  log_callback, ASSFONTS_INFO);
+                  is_subset_only, is_embed_only, is_rename, false,
+                  is_non_ttf_quiet, 1, log_callback, ASSFONTS_INFO);
       g_job = nullptr;
       log_callback("", ASSFONTS_TEXT);
 

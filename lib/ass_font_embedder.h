@@ -47,6 +47,8 @@ class AssFontEmbedder {
   AssFontEmbedder& operator=(const AssFontEmbedder&) = delete;
 
   void set_output_dir_path(const AString& output_ass_path);
+  // Skips the warnings about embedding fonts that are not .ttf.
+  void set_non_ttf_quiet(const bool is_non_ttf_quiet);
   bool Run(const bool is_subset_only, const bool is_embed_only,
            const bool is_rename = false);
   void Clear();
@@ -56,6 +58,7 @@ class AssFontEmbedder {
   std::vector<FontSubsetter::FontSubsetInfo> subfonts_info_;
   std::shared_ptr<Logger> logger_;
   AString output_dir_path_;
+  bool is_non_ttf_quiet_ = false;
   std::map<std::string, std::string> fontname_map_;
 
   void WriteOutput(const std::vector<std::string>& text, size_t& num_line,

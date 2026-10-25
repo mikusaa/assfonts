@@ -31,139 +31,139 @@
 <context>
     <name>DuplicatesDialog</name>
     <message>
-        <location filename="../duplicates_dialog.cc" line="48" />
+        <location filename="../duplicates_dialog.cc" line="47" />
         <source>Name conflict</source>
         <translation>名称冲突</translation>
     </message>
     <message>
-        <location filename="../duplicates_dialog.cc" line="50" />
+        <location filename="../duplicates_dialog.cc" line="49" />
         <source>Versions</source>
         <translation>多版本</translation>
     </message>
     <message>
-        <location filename="../duplicates_dialog.cc" line="52" />
+        <location filename="../duplicates_dialog.cc" line="51" />
         <source>Renamed copy</source>
         <translation>改名副本</translation>
     </message>
     <message>
-        <location filename="../duplicates_dialog.cc" line="54" />
+        <location filename="../duplicates_dialog.cc" line="53" />
         <source>Identical</source>
         <translation>完全相同</translation>
     </message>
     <message>
-        <location filename="../duplicates_dialog.cc" line="76" />
+        <location filename="../duplicates_dialog.cc" line="75" />
         <source>Different fonts answer to the same name. A subtitle asking for it may get either one. Keep the right one in the library.</source>
         <translation>不同的字体用了同一个名字，字幕要这个名字时可能拿到其中任意一个。请只在字体库里保留正确的那个。</translation>
     </message>
     <message>
-        <location filename="../duplicates_dialog.cc" line="80" />
+        <location filename="../duplicates_dialog.cc" line="79" />
         <source>Releases of the same font. A subtitle may get the older one; the newest usually has more characters.</source>
         <translation>同一字体的不同版本。字幕可能拿到旧版，而新版通常字更全。</translation>
     </message>
     <message>
-        <location filename="../duplicates_dialog.cc" line="84" />
+        <location filename="../duplicates_dialog.cc" line="83" />
         <source>The same glyphs with other names or details. Subtitles may ask for any of the names, so keep them unless you are sure.</source>
         <translation>字形相同，但名字或其他信息不同。字幕可能用到其中任何一个名字，没把握就都留着。</translation>
     </message>
     <message>
-        <location filename="../duplicates_dialog.cc" line="88" />
+        <location filename="../duplicates_dialog.cc" line="87" />
         <source>The same font in several files. One copy is enough.</source>
         <translation>同一个字体存了好几份，留一份就够了。</translation>
     </message>
     <message>
-        <location filename="../duplicates_dialog.cc" line="117" />
-        <location filename="../duplicates_dialog.cc" line="124" />
+        <location filename="../duplicates_dialog.cc" line="116" />
+        <location filename="../duplicates_dialog.cc" line="123" />
         <source>Duplicates and name conflicts</source>
         <translation>重复与名称冲突</translation>
     </message>
     <message>
-        <location filename="../duplicates_dialog.cc" line="134" />
+        <location filename="../duplicates_dialog.cc" line="133" />
         <source>All %1</source>
         <translation>全部 %1</translation>
     </message>
     <message>
-        <location filename="../duplicates_dialog.cc" line="140" />
+        <location filename="../duplicates_dialog.cc" line="139" />
         <source>Show</source>
         <translation>显示</translation>
     </message>
     <message>
-        <location filename="../duplicates_dialog.cc" line="159" />
+        <location filename="../duplicates_dialog.cc" line="158" />
         <source>No duplicates or name conflicts found.</source>
         <translation>没有发现重复或名称冲突。</translation>
     </message>
     <message numerus="yes">
-        <location filename="../duplicates_dialog.cc" line="167" />
+        <location filename="../duplicates_dialog.cc" line="166" />
         <source>%n font(s) were read by an older version and are not checked. Update the library to include them.</source>
         <translation><numerusform>有 %n 个字体是旧版本读取的，尚未检查。更新字体库后会一并检查。</numerusform></translation>
     </message>
     <message>
-        <location filename="../duplicates_dialog.cc" line="178" />
+        <location filename="../duplicates_dialog.cc" line="177" />
         <source>Picked files are moved to a folder you choose, outside the library. Fonts in system folders cannot be moved here.</source>
         <translation>勾选的文件会移动到你指定的字体库外的文件夹。系统字体文件夹里的字体不能在这里移动。</translation>
     </message>
     <message>
-        <location filename="../duplicates_dialog.cc" line="183" />
+        <location filename="../duplicates_dialog.cc" line="182" />
         <source>Close</source>
         <translation>关闭</translation>
     </message>
     <message>
-        <location filename="../duplicates_dialog.cc" line="222" />
+        <location filename="../duplicates_dialog.cc" line="221" />
         <source>Shared names: %1</source>
         <translation>共用的名字：%1</translation>
     </message>
     <message>
-        <location filename="../duplicates_dialog.cc" line="222" />
+        <location filename="../duplicates_dialog.cc" line="221" />
         <source>, </source>
         <translation>、</translation>
     </message>
     <message>
-        <location filename="../duplicates_dialog.cc" line="245" />
+        <location filename="../duplicates_dialog.cc" line="244" />
         <source>In a system font folder</source>
         <translation>位于系统字体文件夹</translation>
     </message>
     <message>
-        <location filename="../duplicates_dialog.cc" line="258" />
+        <location filename="../duplicates_dialog.cc" line="257" />
         <source>Keep</source>
         <translation>建议保留</translation>
     </message>
     <message>
-        <location filename="../duplicates_dialog.cc" line="261" />
+        <location filename="../duplicates_dialog.cc" line="260" />
         <source>System</source>
         <translation>系统</translation>
     </message>
     <message numerus="yes">
-        <location filename="../duplicates_dialog.cc" line="277" />
+        <location filename="../duplicates_dialog.cc" line="276" />
         <source>%n glyph(s)</source>
         <translation><numerusform>%n 个字形</numerusform></translation>
     </message>
     <message numerus="yes">
-        <location filename="../duplicates_dialog.cc" line="280" />
+        <location filename="../duplicates_dialog.cc" line="279" />
         <source>file holds %n font(s)</source>
         <translation><numerusform>文件内含 %n 个字体</numerusform></translation>
     </message>
     <message>
+        <location filename="../duplicates_dialog.cc" line="291" />
         <location filename="../duplicates_dialog.cc" line="292" />
-        <location filename="../duplicates_dialog.cc" line="293" />
         <source>Show in folder</source>
         <translation>在文件夹中显示</translation>
     </message>
     <message numerus="yes">
-        <location filename="../duplicates_dialog.cc" line="334" />
+        <location filename="../duplicates_dialog.cc" line="333" />
         <source>Move %n file(s)…</source>
         <translation><numerusform>移动 %n 个文件…</numerusform></translation>
     </message>
     <message>
-        <location filename="../duplicates_dialog.cc" line="345" />
+        <location filename="../duplicates_dialog.cc" line="344" />
         <source>Choose where to move the files</source>
         <translation>选择把文件移动到哪里</translation>
     </message>
     <message>
-        <location filename="../duplicates_dialog.cc" line="357" />
+        <location filename="../duplicates_dialog.cc" line="356" />
         <source>Choose a folder outside the font library and the system font folders.</source>
         <translation>请选择字体库和系统字体文件夹以外的文件夹。</translation>
     </message>
     <message>
-        <location filename="../duplicates_dialog.cc" line="398" />
+        <location filename="../duplicates_dialog.cc" line="379" />
         <source>These files could not be moved:
 %1</source>
         <translation>以下文件无法移动：
@@ -704,32 +704,37 @@
         <translation>无法访问「%1」</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="226" />
-        <source>"%1" is not a TrueType font</source>
-        <translation>「%1」不是 TrueType 字体</translation>
+        <location filename="../log_translator.cc" line="227" />
+        <source>"%1" is not a TrueType (.ttf) font. Some players may not load it once embedded</source>
+        <translation>「%1」不是 TrueType（.ttf）字体，嵌入后部分播放器可能无法加载</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="231" />
+        <location filename="../log_translator.cc" line="233" />
+        <source>Embedded non-TTF fonts (see the warnings above). The ASS specs only allow TrueType fonts; libass-based players such as mpv load them fine, but other renderers may not. To be safe, convert them to .ttf (e.g. with otf2ttf) and embed again</source>
+        <translation>嵌入了非 TTF 字体（见上方警告）。ASS 规范只允许嵌入 TrueType 字体；mpv 等基于 libass 的播放器可以正常加载，其他渲染器则不一定。稳妥起见，可先用 otf2ttf 等工具转成 .ttf 再嵌入</translation>
+    </message>
+    <message>
+        <location filename="../log_translator.cc" line="242" />
         <source>Failed to search for font files: %1</source>
         <translation>搜索字体文件失败：%1</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="234" />
+        <location filename="../log_translator.cc" line="245" />
         <source>No fonts database folder set</source>
         <translation>未设置字体库位置</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="236" />
+        <location filename="../log_translator.cc" line="247" />
         <source>No font folder added</source>
         <translation>还没有添加字体目录</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="238" />
+        <location filename="../log_translator.cc" line="249" />
         <source>No subtitle file added</source>
         <translation>还没有添加字幕文件</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="240" />
+        <location filename="../log_translator.cc" line="251" />
         <source>No output folder set</source>
         <translation>未设置输出文件夹</translation>
     </message>
@@ -767,32 +772,32 @@
         <translation><numerusform>处理 %n 个字幕</numerusform></translation>
     </message>
     <message numerus="yes">
-        <location filename="../main_window.cc" line="316" />
+        <location filename="../main_window.cc" line="318" />
         <source>Importing %n font file(s)</source>
         <translation><numerusform>导入 %n 个字体文件</numerusform></translation>
     </message>
     <message>
-        <location filename="../main_window.cc" line="426" />
+        <location filename="../main_window.cc" line="428" />
         <source>Rebuilding font library</source>
         <translation>完全重建字体库</translation>
     </message>
     <message>
-        <location filename="../main_window.cc" line="427" />
+        <location filename="../main_window.cc" line="429" />
         <source>Updating font library</source>
         <translation>更新字体库</translation>
     </message>
     <message>
-        <location filename="../main_window.cc" line="447" />
+        <location filename="../main_window.cc" line="449" />
         <source>Still working</source>
         <translation>正在处理</translation>
     </message>
     <message>
-        <location filename="../main_window.cc" line="448" />
+        <location filename="../main_window.cc" line="450" />
         <source>Please wait until the current task finishes.</source>
         <translation>请等当前任务完成后再操作。</translation>
     </message>
     <message>
-        <location filename="../main_window.cc" line="450" />
+        <location filename="../main_window.cc" line="452" />
         <source>OK</source>
         <translation>好</translation>
     </message>
@@ -932,10 +937,6 @@
         <location filename="../process_page.cc" line="256" />
         <source>Copy all names</source>
         <translation>复制全部名称</translation>
-    </message>
-    <message>
-        <source>Put the fonts into any font folder of the library, then update the library and process the affected files again.</source>
-        <translation>把字体放进字体库的任一目录，然后更新字体库并重新处理这些文件。</translation>
     </message>
     <message>
         <location filename="../process_page.cc" line="281" />
@@ -1383,88 +1384,98 @@ A whole season can be processed at once</source>
         <translation>全部成功时才打开。</translation>
     </message>
     <message>
-        <location filename="../settings_page.cc" line="123" />
+        <location filename="../settings_page.cc" line="120" />
+        <source>Warn when embedding OTF fonts</source>
+        <translation>嵌入 OTF 字体时提示</translation>
+    </message>
+    <message>
+        <location filename="../settings_page.cc" line="121" />
+        <source>The ASS specs only allow TrueType fonts, but most modern players load OTF fine.</source>
+        <translation>ASS 规范只允许 TrueType 字体，但多数现代播放器都能正常加载 OTF。</translation>
+    </message>
+    <message>
+        <location filename="../settings_page.cc" line="126" />
         <source>Log</source>
         <translation>日志</translation>
     </message>
     <message>
-        <location filename="../settings_page.cc" line="124" />
+        <location filename="../settings_page.cc" line="127" />
         <source>Clear the log before each run</source>
         <translation>每次运行前自动清空</translation>
     </message>
     <message>
-        <location filename="../settings_page.cc" line="126" />
+        <location filename="../settings_page.cc" line="129" />
         <source>Show the log when there are warnings or errors</source>
         <translation>有警告或错误时自动展开日志</translation>
     </message>
     <message>
-        <location filename="../settings_page.cc" line="127" />
+        <location filename="../settings_page.cc" line="130" />
         <source>Otherwise the log stays folded away.</source>
         <translation>平时保持收起，界面更清爽。</translation>
     </message>
     <message>
-        <location filename="../settings_page.cc" line="135" />
+        <location filename="../settings_page.cc" line="138" />
         <source>Show in Explorer</source>
         <translation>在资源管理器中显示</translation>
     </message>
     <message>
-        <location filename="../settings_page.cc" line="137" />
+        <location filename="../settings_page.cc" line="140" />
         <source>Show in Finder</source>
         <translation>在访达中显示</translation>
     </message>
     <message>
-        <location filename="../settings_page.cc" line="139" />
+        <location filename="../settings_page.cc" line="142" />
         <source>Open folder</source>
         <translation>打开文件夹</translation>
     </message>
     <message>
-        <location filename="../settings_page.cc" line="141" />
+        <location filename="../settings_page.cc" line="144" />
         <source>Change…</source>
         <translation>更改…</translation>
     </message>
     <message>
-        <location filename="../settings_page.cc" line="145" />
+        <location filename="../settings_page.cc" line="148" />
         <source>Library data location</source>
         <translation>字体库数据位置</translation>
     </message>
     <message>
-        <location filename="../settings_page.cc" line="150" />
+        <location filename="../settings_page.cc" line="153" />
         <source>Reset…</source>
         <translation>恢复默认…</translation>
     </message>
     <message>
-        <location filename="../settings_page.cc" line="151" />
+        <location filename="../settings_page.cc" line="154" />
         <source>Check for updates</source>
         <translation>检查更新</translation>
     </message>
     <message>
-        <location filename="../settings_page.cc" line="154" />
+        <location filename="../settings_page.cc" line="157" />
         <source>Data</source>
         <translation>数据</translation>
     </message>
     <message>
-        <location filename="../settings_page.cc" line="156" />
-        <location filename="../settings_page.cc" line="243" />
+        <location filename="../settings_page.cc" line="159" />
+        <location filename="../settings_page.cc" line="252" />
         <source>Reset settings</source>
         <translation>恢复默认设置</translation>
     </message>
     <message>
-        <location filename="../settings_page.cc" line="157" />
+        <location filename="../settings_page.cc" line="160" />
         <source>Your font library and its folders are kept.</source>
         <translation>不会删除字体库和已添加的目录。</translation>
     </message>
     <message>
-        <location filename="../settings_page.cc" line="158" />
+        <location filename="../settings_page.cc" line="161" />
         <source>Version %1.%2.%3</source>
         <translation>版本 %1.%2.%3</translation>
     </message>
     <message>
-        <location filename="../settings_page.cc" line="230" />
+        <location filename="../settings_page.cc" line="239" />
         <source>Choose where to keep the font library</source>
         <translation>选择字体库数据的保存位置</translation>
     </message>
     <message>
-        <location filename="../settings_page.cc" line="244" />
+        <location filename="../settings_page.cc" line="253" />
         <source>Reset all settings to their defaults? Your font library and its folders are kept.</source>
         <translation>确定把所有设置恢复为默认吗？字体库和已添加的目录会保留。</translation>
     </message>
@@ -1473,7 +1484,7 @@ A whole season can be processed at once</source>
     <name>TaskRunner</name>
     <message>
         <location filename="../task_runner.cc" line="106" />
-        <location filename="../task_runner.cc" line="254" />
+        <location filename="../task_runner.cc" line="255" />
         <source>Updating fonts database…</source>
         <translation>正在更新字体库…</translation>
     </message>
@@ -1508,7 +1519,7 @@ A whole season can be processed at once</source>
         <translation>无法把「%1」复制到「%2」</translation>
     </message>
     <message>
-        <location filename="../task_runner.cc" line="259" />
+        <location filename="../task_runner.cc" line="260" />
         <source>Processing subtitles…</source>
         <translation>正在处理字幕…</translation>
     </message>

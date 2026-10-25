@@ -53,6 +53,7 @@ class SettingsPage : public QWidget {
   ToggleSwitch* multi_thread_switch_;
   ToggleSwitch* precheck_switch_;
   ToggleSwitch* open_output_switch_;
+  ToggleSwitch* warn_non_ttf_switch_;
   ToggleSwitch* auto_clear_switch_;
   ToggleSwitch* auto_expand_switch_;
   QLabel* db_dir_label_;

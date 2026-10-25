@@ -52,13 +52,17 @@ the similar effect as those graphical subtitles such as PGS.
 .TP
 \fB\-c\fR, \fB\-\-font\-combined\fR <\fIbool\fR>    !!Experimental!! When there are multiple input files, combine the (subsetted) fonts with the same fontname together (Default: False)
 .TP
+\fB\-\-quiet\-non\-ttf\fR     <\fIbool\fR>    Do not warn about embedding non\-TTF (e.g. .otf) fonts (Default: False)
+.TP
 \fB\-v\fR, \fB\-\-verbose\fR       <\fInum\fR>     Set logging level (0 to 3), 0 is off  (Default: 3)
 .TP
 \fB\-h\fR, \fB\-\-help\fR                    Get help info
 .SH "CAUTION"
 According \fBASS Specs\fR, only Truetype fonts can be embedded into ASS Script.
 This program will ignore this rule and embed non\-ttf fonts in by force.
-Some video players may not load these fonts correctly.
+Some video players may not load these fonts correctly
+(libass\-based players such as mpv load them fine).
+Give \fB\-\-quiet\-non\-ttf\fR to skip the warnings.
 One recommended solution is to subset fonts without embedding firstly by giving option \fB\-s\fR or \fB\-\-subset\-only\fR.
 Then convert those subsetted fonts to .ttf fonts using some 3rdparty tools like \fBotf2ttf\fR.
 Finally, rerun this program by giving option \fB\-e\fR or \fB\-\-embed\-only\fR and setting fonts directory to subsetted fonts.
