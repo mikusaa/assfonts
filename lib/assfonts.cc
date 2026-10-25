@@ -310,19 +310,15 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
   }
 }
 
-char* AssfontsCheck(const char** input_paths, const unsigned int num_paths,
-                    const char* db_path, const AssfontsLogCallback cb,
-                    const enum ASSFONTS_LOG_LEVEL log_level) {
-  auto logger = std::make_shared<ass::Logger>(ass::Logger(cb, log_level));
+namespace {
 
+// Checks each subtitle against the fonts the parser holds and returns the
+// JSON array described for AssfontsCheck.
+char* CheckSubtitles(const ass::FontParser& fp, const char** input_paths,
+                     const unsigned int num_paths,
+                     const AssfontsLogCallback cb,
+                     const enum ASSFONTS_LOG_LEVEL log_level) {
   nlohmann::json results = nlohmann::json::array();
-
-  ass::FontParser fp(logger);
-
-  if (*db_path != '\0') {
-    fs::path db(db_path);
-    fp.LoadDB(db.native() + fs::path::preferred_separator + _ST("fonts.json"));
-  }
 
   for (unsigned int idx = 0; idx < num_paths; ++idx) {
     nlohmann::json result;
@@ -377,6 +373,79 @@ char* AssfontsCheck(const char** input_paths, const unsigned int num_paths,
   std::copy(dump.begin(), dump.end(), res);
   res[dump.size()] = '\0';
   return res;
+}
+
+}  // namespace
+
+char* AssfontsCheck(const char** input_paths, const unsigned int num_paths,
+                    const char* db_path, const AssfontsLogCallback cb,
+                    const enum ASSFONTS_LOG_LEVEL log_level) {
+  auto logger = std::make_shared<ass::Logger>(ass::Logger(cb, log_level));
+
+  ass::FontParser fp(logger);
+
+  if (*db_path != '\0') {
+    fs::path db(db_path);
+    fp.LoadDB(db.native() + fs::path::preferred_separator + _ST("fonts.json"));
+  }
+
+  return CheckSubtitles(fp, input_paths, num_paths, cb, log_level);
+}
+
+char* AssfontsCheckFonts(const char** input_paths, const unsigned int num_paths,
+                         const char** fonts_paths, const unsigned int num_fonts,
+                         const AssfontsLogCallback cb,
+                         const enum ASSFONTS_LOG_LEVEL log_level) {
+  auto logger = std::make_shared<ass::Logger>(ass::Logger(cb, log_level));
+
+  ass::FontParser fp(logger);
+
+  std::vector<AString> paths;
+  for (unsigned int idx = 0; idx < num_fonts; ++idx) {
+    if (*fonts_paths[idx] != '\0') {
+      paths.emplace_back(fs::path(fonts_paths[idx]).native());
+    }
+  }
+
+  if (!paths.empty()) {
+    fp.LoadFonts(paths, false);
+  }
+
+  return CheckSubtitles(fp, input_paths, num_paths, cb, log_level);
+}
+
+void AssfontsAddFonts(const char** font_files, const unsigned int num_files,
+                      const char* db_path, const AssfontsLogCallback cb,
+                      const enum ASSFONTS_LOG_LEVEL log_level) {
+  auto logger = std::make_shared<ass::Logger>(ass::Logger(cb, log_level));
+
+  if (*db_path == '\0') {
+    logger->Error("No database directory.");
+    return;
+  }
+
+  std::vector<AString> files;
+  for (unsigned int idx = 0; idx < num_files; ++idx) {
+    if (*font_files[idx] != '\0') {
+      files.emplace_back(fs::path(font_files[idx]).native());
+    }
+  }
+
+  if (files.empty()) {
+    return;
+  }
+
+  ass::FontParser fp(logger);
+
+  fs::path db(db_path);
+  const AString db_file =
+      db.native() + fs::path::preferred_separator + _ST("fonts.json");
+
+  fp.LoadDB(db_file);
+
+  fp.AddFontFiles(files);
+
+  fp.SaveDB(db_file);
 }
 
 void AssfontsFreeString(char* str) {

@@ -56,6 +56,10 @@ class FontParser {
 
   void LoadFonts(std::vector<AString> fonts_dirs, bool with_default = true);
 
+  // Starts from the loaded database and parses the given files into it,
+  // so SaveDB keeps every other entry.
+  void AddFontFiles(const std::vector<AString>& font_files);
+
   void SaveDB(const AString& db_path);
 
   void LoadDB(const AString& db_path);
