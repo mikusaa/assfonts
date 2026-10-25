@@ -35,12 +35,14 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMessageBox>
 #include <QMimeData>
 #include <QScrollArea>
 #include <QUrl>
 #include <QUrlQuery>
 
 #include "log_translator.h"
+#include "pack_dialog.h"
 #include "theme.h"
 
 namespace {
@@ -275,12 +277,22 @@ QWidget* ProcessPage::InitMissingCard() {
   auto* flayout = new QVBoxLayout(footer);
   flayout->setContentsMargins(16, 12, 16, 14);
   flayout->setSpacing(8);
-  flayout->addWidget(ui::Label(
-      tr("Put the fonts into any font folder of the library, then update the "
-         "library and process the affected files again."),
-      "caption"));
-  retry_button_ = ui::Button(QString(), "primary", "refresh");
-  flayout->addWidget(retry_button_, 0, Qt::AlignLeft);
+  auto* footer_label = ui::Label(
+      tr("Pick the font pack that came with the subtitles to import the "
+         "missing fonts from it. Or put the fonts into any font folder of the "
+         "library, then update the library and process the affected files "
+         "again."),
+      "caption");
+  footer_label->setWordWrap(true);
+  flayout->addWidget(footer_label);
+  auto* footer_buttons = new QHBoxLayout;
+  footer_buttons->setSpacing(8);
+  pack_button_ = ui::Button(tr("Import from font pack…"), "primary", "folder");
+  retry_button_ = ui::Button(QString(), QString(), "refresh");
+  footer_buttons->addWidget(pack_button_);
+  footer_buttons->addWidget(retry_button_);
+  footer_buttons->addStretch();
+  flayout->addLayout(footer_buttons);
   layout->addWidget(footer);
 
   connect(copy_all_button, &QPushButton::clicked, this, [this]() {
@@ -293,13 +305,22 @@ QWidget* ProcessPage::InitMissingCard() {
     QGuiApplication::clipboard()->setText(names.join("\n"));
   });
 
-  connect(retry_button_, &QPushButton::clicked, this, [this]() {
-    QStringList inputs;
-    for (const auto& file : files_) {
-      if (!file.missing.isEmpty()) {
-        inputs.append(file.path);
-      }
+  connect(pack_button_, &QPushButton::clicked, this, [this]() {
+    const QStringList inputs = MissingInputs();
+    if (inputs.isEmpty() || is_busy_) {
+      return;
     }
+    // Packs usually sit next to the subtitles they came with.
+    const QString pack_dir = QFileDialog::getExistingDirectory(
+        this, tr("Choose the font pack folder"),
+        QFileInfo(inputs.first()).absolutePath());
+    if (!pack_dir.isEmpty()) {
+      emit RequestPackScan(inputs, pack_dir);
+    }
+  });
+
+  connect(retry_button_, &QPushButton::clicked, this, [this]() {
+    const QStringList inputs = MissingInputs();
     if (!inputs.isEmpty() && !is_busy_) {
       emit RequestUpdateAndRetry(inputs);
     }
@@ -626,6 +647,98 @@ void ProcessPage::OnCheckDone(const QStringList& inputs, const QString& json) {
   RefreshSummary();
 }
 
+void ProcessPage::OnPackScanDone(const QString& pack_dir, const QString& json,
+                                 const QStringList& library_dirs) {
+  struct PackFont {
+    FontKey key;
+    QString path;
+    int num_missing_chars = 0;
+  };
+  QVector<PackFont> found;
+
+  // Only fonts still missing from the library count; the pack may also hold
+  // fonts the library already has.
+  const QJsonArray results = QJsonDocument::fromJson(json.toUtf8()).array();
+  for (const auto& value : results) {
+    const QJsonObject result = value.toObject();
+    const int row = IndexOf(result.value("input").toString());
+    if (row < 0 || !result.value("ok").toBool()) {
+      continue;
+    }
+
+    for (const auto& font_value : result.value("fonts").toArray()) {
+      const QJsonObject font = font_value.toObject();
+      if (!font.value("found").toBool()) {
+        continue;
+      }
+
+      PackFont pack_font;
+      pack_font.key.name = font.value("name").toString();
+      pack_font.key.bold = font.value("bold").toInt();
+      pack_font.key.italic = font.value("italic").toInt();
+      pack_font.path = font.value("path").toString();
+      pack_font.num_missing_chars =
+          font.value("missing_codepoints").toArray().size();
+
+      const auto& missing = files_.at(row).missing;
+      const bool is_missing =
+          std::any_of(missing.begin(), missing.end(), [&](const FontUse& use) {
+            return SameKey(use.key, pack_font.key);
+          });
+      const bool is_known =
+          std::any_of(found.begin(), found.end(), [&](const PackFont& other) {
+            return SameKey(other.key, pack_font.key);
+          });
+      if (is_missing && !is_known) {
+        found.append(pack_font);
+      }
+    }
+  }
+
+  QVector<PackImportDialog::Match> matches;
+  QStringList not_found;
+  for (const auto& font : missing_fonts_) {
+    auto it = std::find_if(found.begin(), found.end(), [&](const PackFont& f) {
+      return SameKey(f.key, font.key);
+    });
+    if (it != found.end()) {
+      matches.append({font.key.name, StyleText(font.key), it->path,
+                      it->num_missing_chars});
+    } else if (!not_found.contains(font.key.name)) {
+      not_found.append(font.key.name);
+    }
+  }
+
+  const QString title = tr("Import from font pack");
+
+  if (matches.isEmpty()) {
+    QMessageBox::information(
+        this, title,
+        tr("None of the missing fonts are in \"%1\".")
+            .arg(QDir::toNativeSeparators(pack_dir)));
+    return;
+  }
+
+  if (library_dirs.isEmpty()) {
+    QMessageBox::information(
+        this, title,
+        tr("Add a font folder to the font library first. Imported fonts are "
+           "copied into one of its folders."));
+    emit RequestShowLibrary(QString());
+    return;
+  }
+
+  PackImportDialog dialog(pack_dir, matches, not_found, library_dirs,
+                          settings_->value("Process/ImportDir").toString(),
+                          this);
+  if (dialog.exec() != QDialog::Accepted) {
+    return;
+  }
+
+  settings_->setValue("Process/ImportDir", dialog.TargetDir());
+  emit RequestImport(dialog.Sources(), dialog.TargetDir());
+}
+
 void ProcessPage::OnFileStarted(const QString& input) {
   const int row = IndexOf(input);
   if (row >= 0) {
@@ -682,6 +795,7 @@ void ProcessPage::OnRunDone(bool is_stopped) {
 void ProcessPage::SetBusy(bool is_busy) {
   is_busy_ = is_busy;
   check_button_->setEnabled(!is_busy && !files_.isEmpty());
+  pack_button_->setEnabled(!is_busy);
   retry_button_->setEnabled(!is_busy);
   if (!is_running_) {
     start_button_->setEnabled(!is_busy && !files_.isEmpty());
@@ -911,10 +1025,7 @@ void ProcessPage::RebuildMissing() {
   missing_fonts_.clear();
   glyph_issues_.clear();
 
-  auto same = [](const FontKey& a, const FontKey& b) {
-    return a.name.compare(b.name, Qt::CaseInsensitive) == 0 &&
-           a.bold == b.bold && a.italic == b.italic;
-  };
+  const auto same = &ProcessPage::SameKey;
 
   for (const auto& file : files_) {
     const QString file_name = QFileInfo(file.path).fileName();
@@ -1065,6 +1176,7 @@ void ProcessPage::RebuildMissing() {
   retry_button_->setText(tr("Update library and retry %n file(s)", "",
                             num_files_missing));
   retry_button_->setVisible(num_files_missing > 0);
+  pack_button_->setVisible(num_files_missing > 0);
   missing_card_->setVisible(!missing_fonts_.isEmpty() ||
                             !glyph_issues_.isEmpty());
 }
@@ -1191,6 +1303,21 @@ QVariantMap ProcessPage::Options() const {
   options["combined"] = combined_switch_->isChecked();
 
   return options;
+}
+
+QStringList ProcessPage::MissingInputs() const {
+  QStringList inputs;
+  for (const auto& file : files_) {
+    if (!file.missing.isEmpty()) {
+      inputs.append(file.path);
+    }
+  }
+  return inputs;
+}
+
+bool ProcessPage::SameKey(const FontKey& a, const FontKey& b) {
+  return a.name.compare(b.name, Qt::CaseInsensitive) == 0 &&
+         a.bold == b.bold && a.italic == b.italic;
 }
 
 QString ProcessPage::StyleText(const FontKey& key) {

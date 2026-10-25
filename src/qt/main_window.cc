@@ -212,6 +212,9 @@ void MainWindow::InitConnects() {
   // Requests to the worker thread.
   connect(this, &MainWindow::OnSendBuild, worker_, &TaskRunner::OnBuildRun);
   connect(this, &MainWindow::OnSendCheck, worker_, &TaskRunner::OnCheckRun);
+  connect(this, &MainWindow::OnSendPackScan, worker_,
+          &TaskRunner::OnPackScanRun);
+  connect(this, &MainWindow::OnSendImport, worker_, &TaskRunner::OnImportRun);
   connect(this, &MainWindow::OnSendStart, worker_, &TaskRunner::OnStartRun);
 
   // Results from the worker thread.
@@ -241,6 +244,12 @@ void MainWindow::InitConnects() {
   connect(worker_, &TaskRunner::OnSendCheckDone, this,
           [this](QStringList inputs, QString json) {
             process_page_->OnCheckDone(inputs, json);
+          });
+
+  connect(worker_, &TaskRunner::OnSendPackScanDone, this,
+          [this](QString pack_dir, QString json) {
+            process_page_->OnPackScanDone(pack_dir, json,
+                                          library_page_->FontDirs());
           });
 
   connect(worker_, &TaskRunner::OnSendFileStarted, process_page_,
@@ -294,6 +303,18 @@ void MainWindow::InitConnects() {
             UpdateLibrary(false);
             emit OnSendCheck(inputs, DbPath());
             process_page_->Start(inputs);
+          });
+
+  connect(process_page_, &ProcessPage::RequestPackScan, this,
+          [this](QStringList inputs, QString pack_dir) {
+            emit OnSendPackScan(inputs, pack_dir);
+          });
+
+  connect(process_page_, &ProcessPage::RequestImport, this,
+          [this](QStringList sources, QString target_dir) {
+            log_panel_->BeginRun(
+                tr("Importing %n font file(s)", "", sources.size()));
+            emit OnSendImport(sources, target_dir, DbPath());
           });
 
   connect(process_page_, &ProcessPage::RequestShowLibrary, this,

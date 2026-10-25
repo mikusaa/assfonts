@@ -25,6 +25,7 @@
 
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QMap>
 #include <QThreadPool>
 #include <QtConcurrent>
@@ -132,6 +133,104 @@ void TaskRunner::OnCheckRun(const QStringList inputs, const QString db_path) {
   AssfontsFreeString(res);
 
   emit OnSendCheckDone(inputs, json);
+  emit OnSendBusy(false, QString());
+  is_running_ = false;
+}
+
+void TaskRunner::OnPackScanRun(const QStringList inputs,
+                               const QString pack_dir) {
+  if (inputs.isEmpty()) {
+    return;
+  }
+
+  is_running_ = true;
+  emit OnSendBusy(true, tr("Searching the font pack…"));
+
+  CStringList c_inputs(inputs);
+  CStringList c_dirs(QStringList{pack_dir});
+  char* res = AssfontsCheckFonts(c_inputs.data(), c_inputs.size(),
+                                 c_dirs.data(), c_dirs.size(), log_callback,
+                                 ASSFONTS_ERROR);
+  QString json = QString::fromUtf8(res);
+  AssfontsFreeString(res);
+
+  emit OnSendPackScanDone(pack_dir, json);
+  emit OnSendBusy(false, QString());
+  is_running_ = false;
+}
+
+void TaskRunner::OnImportRun(const QStringList sources,
+                             const QString target_dir, const QString db_path) {
+  is_running_ = true;
+  emit OnSendBusy(true, tr("Importing fonts…"));
+
+  auto is_same_file = [](const QString& a, const QString& b) {
+    QFile file_a(a);
+    QFile file_b(b);
+    if (file_a.size() != file_b.size() || !file_a.open(QIODevice::ReadOnly) ||
+        !file_b.open(QIODevice::ReadOnly)) {
+      return false;
+    }
+    constexpr qint64 kChunk = 1 << 20;
+    while (!file_a.atEnd()) {
+      if (file_a.read(kChunk) != file_b.read(kChunk)) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  QDir().mkpath(target_dir);
+  const QDir dir(target_dir);
+
+  QStringList added;
+  for (const auto& source : sources) {
+    const QFileInfo info(source);
+    QString target = dir.filePath(info.fileName());
+
+    if (QFileInfo::exists(target)) {
+      if (is_same_file(source, target)) {
+        log_callback(tr("\"%1\" is already in \"%2\"")
+                         .arg(info.fileName(), target_dir)
+                         .toUtf8()
+                         .constData(),
+                     ASSFONTS_INFO);
+        added.append(target);
+        continue;
+      }
+      // A different font with the same file name: keep both.
+      for (int num = 2; QFileInfo::exists(target); ++num) {
+        target = dir.filePath(QString("%1 (%2).%3")
+                                  .arg(info.completeBaseName())
+                                  .arg(num)
+                                  .arg(info.suffix()));
+      }
+    }
+
+    if (QFile::copy(source, target)) {
+      log_callback(tr("Copied \"%1\" to \"%2\"")
+                       .arg(source, target)
+                       .toUtf8()
+                       .constData(),
+                   ASSFONTS_INFO);
+      added.append(target);
+    } else {
+      log_callback(tr("Cannot copy \"%1\" to \"%2\"")
+                       .arg(source, target)
+                       .toUtf8()
+                       .constData(),
+                   ASSFONTS_WARN);
+    }
+  }
+
+  if (!added.isEmpty()) {
+    QDir().mkpath(db_path);
+    CStringList c_files(added);
+    AssfontsAddFonts(c_files.data(), c_files.size(),
+                     db_path.toUtf8().constData(), log_callback, ASSFONTS_INFO);
+  }
+
+  emit OnSendBuildDone();
   emit OnSendBusy(false, QString());
   is_running_ = false;
 }

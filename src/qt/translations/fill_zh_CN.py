@@ -63,6 +63,34 @@ ZH_CN = {
     "Put the fonts into any font folder of the library, then update the "
     "library and process the affected files again.":
         "把字体放进字体库的任一目录，然后更新字体库并重新处理这些文件。",
+    "Pick the font pack that came with the subtitles to import the missing "
+    "fonts from it. Or put the fonts into any font folder of the library, "
+    "then update the library and process the affected files again.":
+        "选择字幕附带的字体包，从中导入缺失的字体。也可以自己把字体放进字体库的"
+        "任一目录，然后更新字体库并重新处理这些文件。",
+    "Import from font pack…": "从字体包导入…",
+    "Choose the font pack folder": "选择字体包所在文件夹",
+    "Import from font pack": "从字体包导入",
+    "None of the missing fonts are in \"%1\".": "「%1」中没有任何缺失的字体。",
+    "Add a font folder to the font library first. Imported fonts are copied "
+    "into one of its folders.":
+        "请先在字体库中添加一个字体文件夹，导入的字体会复制到其中一个文件夹里。",
+    # Font pack import dialog
+    "%n missing font(s) found in the pack": "在字体包中找到 %n 个缺失的字体",
+    "lacks %n character(s)": "缺 %n 个字",
+    "Not in this pack: %1": "字体包中没有：%1",
+    "Copy to": "复制到",
+    "Files are copied, the pack is left as it is. The copies are added to the "
+    "library and the subtitles are checked again.":
+        "只复制文件，不改动字体包。复制的字体会加入字体库，然后重新检查字幕。",
+    "Cancel": "取消",
+    "Import %n file(s)": "导入 %n 个文件",
+    "Importing %n font file(s)": "导入 %n 个字体文件",
+    "Searching the font pack…": "正在查找字体包…",
+    "Importing fonts…": "正在导入字体…",
+    "\"%1\" is already in \"%2\"": "「%1」已在「%2」中",
+    "Copied \"%1\" to \"%2\"": "已把「%1」复制到「%2」",
+    "Cannot copy \"%1\" to \"%2\"": "无法把「%1」复制到「%2」",
     "Options": "处理选项",
     "Output location": "输出位置",
     "Next to subtitle": "与字幕相同",
@@ -236,6 +264,7 @@ ZH_CN = {
     "Fonts database \"%1\" doesn't exist yet": "字体库「%1」还不存在",
     "Cannot read fonts database \"%1\"": "无法读取字体库「%1」",
     "Fonts database saved to \"%1\"": "字体库已保存到「%1」",
+    "Added %1 font files to the fonts database": "已把 %1 个字体文件加入字体库",
     "\"%1\" already exists and will be overwritten": "「%1」已存在，将被覆盖",
     "No font found, nothing to save": "没有找到字体，未保存",
     "Reading \"%1\"": "读取「%1」",
