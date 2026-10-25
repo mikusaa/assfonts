@@ -5,7 +5,16 @@ on:
     types: [ published ]
   push:
     branches: [ main ] 
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+env:
+  # Names the build outputs: the tag for releases, the branch for pushes.
+  # A pull request's ref name ("1/merge") isn't a file name, so use "pr-1".
+  BUILD_NAME: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || github.ref_name }}
 jobs:
   build-linux:
     runs-on: ubuntu-22.04
@@ -39,7 +48,7 @@ jobs:
             cp ./.github/linux/CMakeUserPresets.json .
             cmake . --preset linux-${{ matrix.profile }}
             cmake --build --preset linux-${{ matrix.profile }}-release --target install -j
-            mv ./out/install/linux-${{ matrix.profile }}/bin/assfonts-cli assfonts-cli-${{ github.ref_name }}-${{ matrix.arch }}-Linux
+            mv ./out/install/linux-${{ matrix.profile }}/bin/assfonts-cli assfonts-cli-${{ env.BUILD_NAME }}-${{ matrix.arch }}-Linux
             cp ./.github/linux/AppImageBuilder_${{ matrix.profile }}.yml AppImageBuilder.yml
             mkdir -p ./AppDir/usr
             cp -r ./out/install/linux-${{ matrix.profile }}/* ./AppDir/usr
@@ -47,14 +56,14 @@ jobs:
             cp ./src/qt/resources/icon.png ./AppDir/usr/share/icons
             mkdir -p ./AppDir/usr/share/applications
             cp ./src/qt/resources/assfonts.desktop ./AppDir/usr/share/applications
-            sed -i 's/!!!VERSION!!!/${{ github.ref_name }}/g' AppImageBuilder.yml
+            sed -i 's/!!!VERSION!!!/${{ env.BUILD_NAME }}/g' AppImageBuilder.yml
             appimage-builder --recipe AppImageBuilder.yml --skip-tests
 
       - name: upload Linux
         uses: actions/upload-artifact@v4
         with:
           name: release-Linux-${{ matrix.arch }}
-          path: assfonts*-${{ github.ref_name }}-${{ matrix.arch }}-Linux*
+          path: assfonts*-${{ env.BUILD_NAME }}-${{ matrix.arch }}-Linux*
           if-no-files-found: error
           
       - name: upload issue
@@ -131,14 +140,14 @@ jobs:
 
       - name: copy and rename
         run: |
-           Copy-Item -Path ".\out\install\windows-${{ matrix.profile }}\bin\assfonts-cli.exe" -Destination "assfonts-cli-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe" -Force
-           Copy-Item -Path ".\out\install\windows-${{ matrix.profile }}\bin\assfonts.exe" -Destination "assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe" -Force
+           Copy-Item -Path ".\out\install\windows-${{ matrix.profile }}\bin\assfonts-cli.exe" -Destination "assfonts-cli-${{ env.BUILD_NAME }}-${{ matrix.arch }}-Windows.exe" -Force
+           Copy-Item -Path ".\out\install\windows-${{ matrix.profile }}\bin\assfonts.exe" -Destination "assfonts-${{ env.BUILD_NAME }}-${{ matrix.arch }}-Windows.exe" -Force
 
       - name: upload Windows
         uses: actions/upload-artifact@v4
         with:
           name: release-Windows-${{ matrix.arch }}
-          path: assfonts*-${{ github.ref_name }}-${{ matrix.arch }}-Windows*
+          path: assfonts*-${{ env.BUILD_NAME }}-${{ matrix.arch }}-Windows*
           if-no-files-found: error
           
       - name: upload issue
@@ -203,13 +212,13 @@ jobs:
 
       - name: rename
         run: |
-          mv -f assfonts.dmg assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS.dmg
+          mv -f assfonts.dmg assfonts-${{ env.BUILD_NAME }}-${{ matrix.arch }}-macOS.dmg
 
       - name: upload macOS
         uses: actions/upload-artifact@v4
         with:
           name: release-macOS-${{ matrix.arch }}
-          path: assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS.dmg
+          path: assfonts-${{ env.BUILD_NAME }}-${{ matrix.arch }}-macOS.dmg
           if-no-files-found: error
           
       - name: upload issue
@@ -307,52 +316,52 @@ jobs:
           gzip -k ./doc/man/assfonts-cli.1
           cp ./doc/man/assfonts-cli.1.gz ./share/man/man1/
           mkdir bin
-          cp -f assfonts-cli-${{ github.ref_name }}-x86_64-Linux ./bin/assfonts-cli
-          cp -f assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage assfonts.AppImage
-          tar -czvf assfonts-${{ github.ref_name }}-x86_64-Linux.tar.gz bin/assfonts-cli assfonts.AppImage ./share/doc/assfonts/LICENSE ./share/doc/assfonts/NEWS ./share/doc/assfonts/NOTICE ./share/man/man1/assfonts-cli.1.gz
-          rm -rf assfonts-cli-${{ github.ref_name }}-x86_64-Linux assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage
-          cp -f assfonts-cli-${{ github.ref_name }}-aarch64-Linux ./bin/assfonts-cli
-          cp -f assfonts-${{ github.ref_name }}-aarch64-Linux.AppImage assfonts.AppImage
-          tar -czvf assfonts-${{ github.ref_name }}-aarch64-Linux.tar.gz bin/assfonts-cli assfonts.AppImage ./share/doc/assfonts/LICENSE ./share/doc/assfonts/NEWS ./share/doc/assfonts/NOTICE ./share/man/man1/assfonts-cli.1.gz
-          rm -rf assfonts-cli-${{ github.ref_name }}-aarch64-Linux assfonts-${{ github.ref_name }}-aarch64-Linux.AppImage
-          cp -f assfonts-cli-${{ github.ref_name }}-armhf-Linux ./bin/assfonts-cli
-          cp -f assfonts-${{ github.ref_name }}-armhf-Linux.AppImage assfonts.AppImage
-          tar -czvf assfonts-${{ github.ref_name }}-armhf-Linux.tar.gz bin/assfonts-cli assfonts.AppImage ./share/doc/assfonts/LICENSE ./share/doc/assfonts/NEWS ./share/doc/assfonts/NOTICE ./share/man/man1/assfonts-cli.1.gz
-          rm -rf assfonts-cli-${{ github.ref_name }}-armhf-Linux assfonts-${{ github.ref_name }}-armhf-Linux.AppImage
-          cp -f assfonts-cli-${{ github.ref_name }}-i686-Linux ./bin/assfonts-cli
-          cp -f assfonts-${{ github.ref_name }}-i686-Linux.AppImage assfonts.AppImage
-          tar -czvf assfonts-${{ github.ref_name }}-i686-Linux.tar.gz bin/assfonts-cli assfonts.AppImage ./share/doc/assfonts/LICENSE ./share/doc/assfonts/NEWS ./share/doc/assfonts/NOTICE ./share/man/man1/assfonts-cli.1.gz
-          rm -rf assfonts-cli-${{ github.ref_name }}-i686-Linux assfonts-${{ github.ref_name }}-i686-Linux.AppImage
-          cp -f assfonts-cli-${{ github.ref_name }}-x86_64-Windows.exe assfonts-cli.exe
-          cp -f assfonts-${{ github.ref_name }}-x86_64-Windows.exe assfonts.exe
-          zip assfonts-${{ github.ref_name }}-x86_64-Windows.zip assfonts.exe assfonts-cli.exe LICENSE.txt NEWS.txt NOTICE.txt README.md
-          rm -rf assfonts-cli-${{ github.ref_name }}-x86_64-Windows.exe assfonts-${{ github.ref_name }}-x86_64-Windows.exe
-          cp -f assfonts-cli-${{ github.ref_name }}-aarch64-Windows.exe assfonts-cli.exe
-          cp -f assfonts-${{ github.ref_name }}-aarch64-Windows.exe assfonts.exe
-          zip assfonts-${{ github.ref_name }}-aarch64-Windows.zip assfonts.exe assfonts-cli.exe LICENSE.txt NEWS.txt NOTICE.txt README.md
-          rm -rf assfonts-cli-${{ github.ref_name }}-aarch64-Windows.exe assfonts-${{ github.ref_name }}-aarch64-Windows.exe
-          cp -f assfonts-cli-${{ github.ref_name }}-i686-Windows.exe assfonts-cli.exe
-          cp -f assfonts-${{ github.ref_name }}-i686-Windows.exe assfonts.exe
-          zip assfonts-${{ github.ref_name }}-i686-Windows.zip assfonts.exe assfonts-cli.exe LICENSE.txt NEWS.txt NOTICE.txt README.md
-          rm -rf assfonts-cli-${{ github.ref_name }}-i686-Windows.exe assfonts-${{ github.ref_name }}-i686-Windows.exe
+          cp -f assfonts-cli-${{ env.BUILD_NAME }}-x86_64-Linux ./bin/assfonts-cli
+          cp -f assfonts-${{ env.BUILD_NAME }}-x86_64-Linux.AppImage assfonts.AppImage
+          tar -czvf assfonts-${{ env.BUILD_NAME }}-x86_64-Linux.tar.gz bin/assfonts-cli assfonts.AppImage ./share/doc/assfonts/LICENSE ./share/doc/assfonts/NEWS ./share/doc/assfonts/NOTICE ./share/man/man1/assfonts-cli.1.gz
+          rm -rf assfonts-cli-${{ env.BUILD_NAME }}-x86_64-Linux assfonts-${{ env.BUILD_NAME }}-x86_64-Linux.AppImage
+          cp -f assfonts-cli-${{ env.BUILD_NAME }}-aarch64-Linux ./bin/assfonts-cli
+          cp -f assfonts-${{ env.BUILD_NAME }}-aarch64-Linux.AppImage assfonts.AppImage
+          tar -czvf assfonts-${{ env.BUILD_NAME }}-aarch64-Linux.tar.gz bin/assfonts-cli assfonts.AppImage ./share/doc/assfonts/LICENSE ./share/doc/assfonts/NEWS ./share/doc/assfonts/NOTICE ./share/man/man1/assfonts-cli.1.gz
+          rm -rf assfonts-cli-${{ env.BUILD_NAME }}-aarch64-Linux assfonts-${{ env.BUILD_NAME }}-aarch64-Linux.AppImage
+          cp -f assfonts-cli-${{ env.BUILD_NAME }}-armhf-Linux ./bin/assfonts-cli
+          cp -f assfonts-${{ env.BUILD_NAME }}-armhf-Linux.AppImage assfonts.AppImage
+          tar -czvf assfonts-${{ env.BUILD_NAME }}-armhf-Linux.tar.gz bin/assfonts-cli assfonts.AppImage ./share/doc/assfonts/LICENSE ./share/doc/assfonts/NEWS ./share/doc/assfonts/NOTICE ./share/man/man1/assfonts-cli.1.gz
+          rm -rf assfonts-cli-${{ env.BUILD_NAME }}-armhf-Linux assfonts-${{ env.BUILD_NAME }}-armhf-Linux.AppImage
+          cp -f assfonts-cli-${{ env.BUILD_NAME }}-i686-Linux ./bin/assfonts-cli
+          cp -f assfonts-${{ env.BUILD_NAME }}-i686-Linux.AppImage assfonts.AppImage
+          tar -czvf assfonts-${{ env.BUILD_NAME }}-i686-Linux.tar.gz bin/assfonts-cli assfonts.AppImage ./share/doc/assfonts/LICENSE ./share/doc/assfonts/NEWS ./share/doc/assfonts/NOTICE ./share/man/man1/assfonts-cli.1.gz
+          rm -rf assfonts-cli-${{ env.BUILD_NAME }}-i686-Linux assfonts-${{ env.BUILD_NAME }}-i686-Linux.AppImage
+          cp -f assfonts-cli-${{ env.BUILD_NAME }}-x86_64-Windows.exe assfonts-cli.exe
+          cp -f assfonts-${{ env.BUILD_NAME }}-x86_64-Windows.exe assfonts.exe
+          zip assfonts-${{ env.BUILD_NAME }}-x86_64-Windows.zip assfonts.exe assfonts-cli.exe LICENSE.txt NEWS.txt NOTICE.txt README.md
+          rm -rf assfonts-cli-${{ env.BUILD_NAME }}-x86_64-Windows.exe assfonts-${{ env.BUILD_NAME }}-x86_64-Windows.exe
+          cp -f assfonts-cli-${{ env.BUILD_NAME }}-aarch64-Windows.exe assfonts-cli.exe
+          cp -f assfonts-${{ env.BUILD_NAME }}-aarch64-Windows.exe assfonts.exe
+          zip assfonts-${{ env.BUILD_NAME }}-aarch64-Windows.zip assfonts.exe assfonts-cli.exe LICENSE.txt NEWS.txt NOTICE.txt README.md
+          rm -rf assfonts-cli-${{ env.BUILD_NAME }}-aarch64-Windows.exe assfonts-${{ env.BUILD_NAME }}-aarch64-Windows.exe
+          cp -f assfonts-cli-${{ env.BUILD_NAME }}-i686-Windows.exe assfonts-cli.exe
+          cp -f assfonts-${{ env.BUILD_NAME }}-i686-Windows.exe assfonts.exe
+          zip assfonts-${{ env.BUILD_NAME }}-i686-Windows.zip assfonts.exe assfonts-cli.exe LICENSE.txt NEWS.txt NOTICE.txt README.md
+          rm -rf assfonts-cli-${{ env.BUILD_NAME }}-i686-Windows.exe assfonts-${{ env.BUILD_NAME }}-i686-Windows.exe
 
       - name: calculate hash
         run: |
-          sha256sum assfonts-${{ github.ref_name }}-x86_64-Linux.tar.gz > assfonts-${{ github.ref_name }}-x86_64-Linux.tar.gz.sha256sum
-          sha256sum assfonts-${{ github.ref_name }}-aarch64-Linux.tar.gz > assfonts-${{ github.ref_name }}-aarch64-Linux.tar.gz.sha256sum
-          sha256sum assfonts-${{ github.ref_name }}-armhf-Linux.tar.gz > assfonts-${{ github.ref_name }}-armhf-Linux.tar.gz.sha256sum
-          sha256sum assfonts-${{ github.ref_name }}-i686-Linux.tar.gz > assfonts-${{ github.ref_name }}-i686-Linux.tar.gz.sha256sum
-          sha256sum assfonts-${{ github.ref_name }}-x86_64-Windows.zip > assfonts-${{ github.ref_name }}-x86_64-Windows.zip.sha256sum
-          sha256sum assfonts-${{ github.ref_name }}-aarch64-Windows.zip > assfonts-${{ github.ref_name }}-aarch64-Windows.zip.sha256sum
-          sha256sum assfonts-${{ github.ref_name }}-i686-Windows.zip > assfonts-${{ github.ref_name }}-i686-Windows.zip.sha256sum
-          sha256sum assfonts-${{ github.ref_name }}-x86_64-macOS.dmg > assfonts-${{ github.ref_name }}-x86_64-macOS.dmg.sha256sum
-          sha256sum assfonts-${{ github.ref_name }}-aarch64-macOS.dmg > assfonts-${{ github.ref_name }}-aarch64-macOS.dmg.sha256sum
+          sha256sum assfonts-${{ env.BUILD_NAME }}-x86_64-Linux.tar.gz > assfonts-${{ env.BUILD_NAME }}-x86_64-Linux.tar.gz.sha256sum
+          sha256sum assfonts-${{ env.BUILD_NAME }}-aarch64-Linux.tar.gz > assfonts-${{ env.BUILD_NAME }}-aarch64-Linux.tar.gz.sha256sum
+          sha256sum assfonts-${{ env.BUILD_NAME }}-armhf-Linux.tar.gz > assfonts-${{ env.BUILD_NAME }}-armhf-Linux.tar.gz.sha256sum
+          sha256sum assfonts-${{ env.BUILD_NAME }}-i686-Linux.tar.gz > assfonts-${{ env.BUILD_NAME }}-i686-Linux.tar.gz.sha256sum
+          sha256sum assfonts-${{ env.BUILD_NAME }}-x86_64-Windows.zip > assfonts-${{ env.BUILD_NAME }}-x86_64-Windows.zip.sha256sum
+          sha256sum assfonts-${{ env.BUILD_NAME }}-aarch64-Windows.zip > assfonts-${{ env.BUILD_NAME }}-aarch64-Windows.zip.sha256sum
+          sha256sum assfonts-${{ env.BUILD_NAME }}-i686-Windows.zip > assfonts-${{ env.BUILD_NAME }}-i686-Windows.zip.sha256sum
+          sha256sum assfonts-${{ env.BUILD_NAME }}-x86_64-macOS.dmg > assfonts-${{ env.BUILD_NAME }}-x86_64-macOS.dmg.sha256sum
+          sha256sum assfonts-${{ env.BUILD_NAME }}-aarch64-macOS.dmg > assfonts-${{ env.BUILD_NAME }}-aarch64-macOS.dmg.sha256sum
 
       - name: edit release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: assfonts-*${{ github.ref_name }}-*
+          file: assfonts-*${{ env.BUILD_NAME }}-*
           tag: ${{ github.ref }}
           overwrite: false
           file_glob: true
