@@ -1,3 +1,21 @@
+Overview of changes leading to v0.8.0
+Monday, October 26, 2026
+====================================
+- new GUI: sidebar with Process / Font library / Settings pages, light and
+  dark themes that follow the system, collapsible sidebar and log panel
+- Simplified Chinese translation, following the system language
+- font library: remembers font folders, updates incrementally and can update
+  before processing; reports duplicate fonts and name conflicts
+- subtitles are checked for missing fonts as soon as they are added; the
+  missing-font panel suggests similar fonts and can import them from a font pack
+- new CLI option --quiet-non-ttf to silence the warnings for embedded non-TTF
+  fonts ("Warn when embedding OTF fonts" in the GUI)
+- the GUI is now shipped as assfonts and the command line tool as assfonts-cli
+- read per-user fonts on Windows, skip duplicate files in overlapping folders
+- fix font names with capitals being stored repeatedly in the database
+- check for updates against github.com/mikusaa/assfonts
+
+
 Overview of changes leading to v0.7.3
 Saturday, October 5, 2024
 ====================================
