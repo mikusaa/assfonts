@@ -10,8 +10,8 @@ set(VCPKG_OVERLAY_TRIPLETS "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg-triplets"
 project (assfonts CXX C)
 
 set(VERSION_MAJOR 0)
-set(VERSION_MINOR 7)
-set(VERSION_PATCH 3)
+set(VERSION_MINOR 8)
+set(VERSION_PATCH 0)
 
 add_subdirectory(3rdparty)
 
