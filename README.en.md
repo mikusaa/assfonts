@@ -10,7 +10,7 @@ Subset fonts and embed them into an ASS subtitle.
 
 assfonts finds the fonts an ASS subtitle needs, subsets them and embeds them UUEncoded into the subtitle, as the ASS format allows. One subtitle file then carries everything needed to render it, much like graphical subtitles such as PGS.
 
-> This is a fork of [wyzdwdz/assfonts](https://github.com/wyzdwdz/assfonts). Upstream's last release was v0.7.3 in October 2024; new features and releases happen here. See [Changes from upstream](#changes-from-upstream).
+> This is a personal fork of [wyzdwdz/assfonts](https://github.com/wyzdwdz/assfonts), made to add features I wanted; it is not an official release. It builds on upstream v0.7.3, see [Changes from upstream](#changes-from-upstream).
 
 ## Download
 
