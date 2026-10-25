@@ -10,7 +10,7 @@
 
 assfonts 会找出 ASS 字幕用到的字体，把它们子集化，再按 ASS 格式的 UUEncode 方式直接嵌入字幕文件。这样一个字幕文件就带齐了渲染所需的全部信息，效果接近 PGS 等图形字幕。
 
-> 本仓库是 [wyzdwdz/assfonts](https://github.com/wyzdwdz/assfonts) 的分支。上游最后一个版本是 2024 年 10 月的 v0.7.3，之后的新功能和发布都在这里进行，详见下文的[与上游的区别](#与上游的区别)。
+> 本仓库是 [wyzdwdz/assfonts](https://github.com/wyzdwdz/assfonts) 的个人复刻，只是为了加上自己想要的功能，并非官方版本。改动基于上游 v0.7.3，详见下文的[与上游的区别](#与上游的区别)。
 
 ## 下载
 

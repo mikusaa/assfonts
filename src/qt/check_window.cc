@@ -23,8 +23,8 @@
 
 #include <assfonts.h>
 
-// Releases come from this fork; upstream (wyzdwdz/assfonts and its Gitee
-// mirror) stopped at 0.7.3.
+// This fork publishes its own releases; upstream (wyzdwdz/assfonts and its
+// Gitee mirror) knows nothing of them.
 constexpr char DOWNLOAD_URL[] =
     "https://github.com/mikusaa/assfonts/releases/latest";
 
