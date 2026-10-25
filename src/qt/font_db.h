@@ -36,6 +36,14 @@ class FontDatabase {
     int weight = 400;
     int slant = 0;
     QString path;
+    int index = 0;
+    // Empty for fonts read by a version without duplicate checking.
+    QString glyph_hash;
+    QString face_hash;
+    QString version;
+    double revision = 0;
+    QString vendor;
+    int num_glyphs = 0;
   };
 
   struct DirStats {
@@ -50,6 +58,7 @@ class FontDatabase {
   int FileCount() const { return paths_.size(); }
   int FamilyCount() const { return num_families_; }
   QDateTime LastUpdated() const { return last_updated_; }
+  const QVector<Font>& Fonts() const { return fonts_; }
 
   QVector<Font> Search(const QString& text, int limit) const;
 

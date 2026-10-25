@@ -28,6 +28,7 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
+#include "duplicates.h"
 #include "font_db.h"
 #include "widgets.h"
 
@@ -90,6 +91,11 @@ class LibraryPage : public QWidget {
   ToggleSwitch* auto_update_switch_;
   ToggleSwitch* check_on_start_switch_;
 
+  duplicates::Report dupes_report_;
+  QHBoxLayout* dupes_chips_layout_;
+  QLabel* dupes_summary_label_;
+  QPushButton* dupes_button_;
+
   QLineEdit* search_line_;
   QLabel* search_count_label_;
   QTableWidget* search_table_;
@@ -99,9 +105,11 @@ class LibraryPage : public QWidget {
   QWidget* InitHeader();
   QWidget* InitStats();
   QWidget* InitDirsCard();
+  QWidget* InitDupesCard();
   QWidget* InitSearchCard();
 
   void RebuildDirs();
   void RunSearch();
+  void RefreshDupes();
   void RemoveDir(const QString& dir);
 };
