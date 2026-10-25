@@ -54,6 +54,7 @@ Options:
                                 (Default: <cpu_count> + 1)
   -c, --font-combined <bool>    !!Experimental!! When there are multiple input files, combine the
                                 (subsetted) fonts with the same fontname together (Default: False)
+      --quiet-non-ttf <bool>    Do not warn about embedding non-TTF (e.g. .otf) fonts (Default: False)
   -v, --verbose       <num>     Set logging level (0 to 3), 0 is off  (Default: 3)
   -h, --help                    Get help info
  ```
@@ -63,6 +64,7 @@ Options:
  
  **Caution!** According [ASS Specs](http://moodub.free.fr/video/ass-specs.doc), only Truetype fonts can be embedded into ASS Script. 
  This program will ignore this rule and embed non-ttf fonts in by force. Some video players may not load these fonts correctly.
+ (libass-based players such as mpv load them fine. Give `--quiet-non-ttf` to skip the warnings.)
  One recommended solution is to subset fonts without embedding firstly by giving option `-s` or `--subset-only` Then convert those
  subsetted fonts (which are located in `<output_directory>/<input_file_name>_subsetted/`) to .ttf fonts using some 3rdparty tools like
  [otf2ttf](https://github.com/shimarulin/otf2ttf). Finally, rerun this program by giving option `-e` or `--embed-only` and setting

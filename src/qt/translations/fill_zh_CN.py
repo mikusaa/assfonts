@@ -267,6 +267,10 @@ ZH_CN = {
     "Shows missing fonts right away instead of after processing.":
         "拖入文件后立刻检查缺不缺字体，不必等到处理完。",
     "Open the output folder when done": "完成后打开输出文件夹",
+    "Warn when embedding OTF fonts": "嵌入 OTF 字体时提示",
+    "The ASS specs only allow TrueType fonts, but most modern players load "
+    "OTF fine.":
+        "ASS 规范只允许 TrueType 字体，但多数现代播放器都能正常加载 OTF。",
     "Only when every file succeeded.": "全部成功时才打开。",
     "Log": "日志",
     "Clear the log before each run": "每次运行前自动清空",
@@ -341,7 +345,16 @@ ZH_CN = {
     "Cannot open \"%1\"": "无法打开「%1」",
     "Cannot read the font name of \"%1\"": "无法读取「%1」的字体名",
     "Cannot access \"%1\"": "无法访问「%1」",
-    "\"%1\" is not a TrueType font": "「%1」不是 TrueType 字体",
+    "\"%1\" is not a TrueType (.ttf) font. Some players may not load it "
+    "once embedded":
+        "「%1」不是 TrueType（.ttf）字体，嵌入后部分播放器可能无法加载",
+    "Embedded non-TTF fonts (see the warnings above). The ASS specs only "
+    "allow TrueType fonts; libass-based players such as mpv load them fine, "
+    "but other renderers may not. To be safe, convert them to .ttf (e.g. with "
+    "otf2ttf) and embed again":
+        "嵌入了非 TTF 字体（见上方警告）。ASS 规范只允许嵌入 TrueType 字体；"
+        "mpv 等基于 libass 的播放器可以正常加载，其他渲染器则不一定。"
+        "稳妥起见，可先用 otf2ttf 等工具转成 .ttf 再嵌入",
     "Failed to search for font files: %1": "搜索字体文件失败：%1",
     "No fonts database folder set": "未设置字体库位置",
     "No font folder added": "还没有添加字体目录",

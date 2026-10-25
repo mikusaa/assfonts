@@ -221,9 +221,20 @@ QString LogTranslator::Translate(const QString& msg) {
        [](const Match& m) {
          return tr("Cannot access \"%1\"").arg(m.captured(1));
        }},
-      {QRegularExpression("^" QUOTED " is not a \\.ttf font\\.$"),
+      {QRegularExpression("^" QUOTED " is not a TrueType \\(\\.ttf\\) font\\. "
+                          "Some players may not load it once embedded\\.$"),
        [](const Match& m) {
-         return tr("\"%1\" is not a TrueType font").arg(m.captured(1));
+         return tr("\"%1\" is not a TrueType (.ttf) font. Some players may "
+                   "not load it once embedded")
+             .arg(m.captured(1));
+       }},
+      {QRegularExpression("^Embedded non-TTF fonts\\. "),
+       [](const Match&) {
+         return tr("Embedded non-TTF fonts (see the warnings above). The ASS "
+                   "specs only allow TrueType fonts; libass-based players "
+                   "such as mpv load them fine, but other renderers may not. "
+                   "To be safe, convert them to .ttf (e.g. with otf2ttf) and "
+                   "embed again");
        }},
       {QRegularExpression(
            "^Failed in searching font files\\. Error code: (.*)$"),

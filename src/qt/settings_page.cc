@@ -116,7 +116,10 @@ SettingsPage::SettingsPage(QSettings* settings, QWidget* parent)
                  tr("Shows missing fonts right away instead of after "
                     "processing.")),
        SwitchRow(&open_output_switch_, tr("Open the output folder when done"),
-                 tr("Only when every file succeeded."))}));
+                 tr("Only when every file succeeded.")),
+       SwitchRow(&warn_non_ttf_switch_, tr("Warn when embedding OTF fonts"),
+                 tr("The ASS specs only allow TrueType fonts, but most "
+                    "modern players load OTF fine."))}));
 
   // Log.
   column->addWidget(Section(
@@ -182,6 +185,8 @@ SettingsPage::SettingsPage(QSettings* settings, QWidget* parent)
       settings_->value("Run/AutoPrecheck", true).toBool());
   open_output_switch_->setChecked(
       settings_->value("Run/OpenOutput", false).toBool());
+  warn_non_ttf_switch_->setChecked(
+      settings_->value("Run/WarnNonTtf", true).toBool());
   auto_clear_switch_->setChecked(
       settings_->value("Log/AutoClear", true).toBool());
   auto_expand_switch_->setChecked(
@@ -209,6 +214,10 @@ SettingsPage::SettingsPage(QSettings* settings, QWidget* parent)
   connect(open_output_switch_, &ToggleSwitch::toggled, this,
           [this](bool checked) {
             settings_->setValue("Run/OpenOutput", checked);
+          });
+  connect(warn_non_ttf_switch_, &ToggleSwitch::toggled, this,
+          [this](bool checked) {
+            settings_->setValue("Run/WarnNonTtf", checked);
           });
   connect(auto_clear_switch_, &ToggleSwitch::toggled, this,
           [this](bool checked) {

@@ -144,6 +144,7 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
                  const unsigned int is_subset_only,
                  const unsigned int is_embed_only, const unsigned int is_rename,
                  const unsigned int is_font_combined,
+                 const unsigned int is_non_ttf_quiet,
                  const unsigned int num_thread, const AssfontsLogCallback cb,
                  const enum ASSFONTS_LOG_LEVEL log_level) {
   auto logger = std::make_shared<ass::Logger>(ass::Logger(cb, log_level));
@@ -269,6 +270,7 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
       ass::AssFontEmbedder afe(ap, fsub.get_subfonts_info(), t_logger);
 
       afe.set_output_dir_path(output.native());
+      afe.set_non_ttf_quiet(is_non_ttf_quiet);
       if (!afe.Run(is_subset_only, is_embed_only, is_rename)) {
         return finish();
       }
@@ -302,6 +304,7 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
       ass::AssFontEmbedder afe(ap, fsub.get_subfonts_info(), logger);
 
       afe.set_output_dir_path(output.native());
+      afe.set_non_ttf_quiet(is_non_ttf_quiet);
 
       if (!afe.Run(true, false, is_rename)) {
         return;

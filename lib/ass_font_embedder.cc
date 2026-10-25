@@ -35,6 +35,10 @@ void AssFontEmbedder::set_output_dir_path(const AString& output_dir_path) {
   output_dir_path_ = output_dir_path;
 }
 
+void AssFontEmbedder::set_non_ttf_quiet(const bool is_non_ttf_quiet) {
+  is_non_ttf_quiet_ = is_non_ttf_quiet;
+}
+
 bool AssFontEmbedder::Run(const bool is_subset_only, const bool is_embed_only,
                           const bool is_rename) {
   fs::path input_path;
@@ -90,12 +94,12 @@ void AssFontEmbedder::WriteOutput(const std::vector<std::string>& text,
       WriteFonts(has_none_ttf, output_ass);
       output_ass << "\n\n" << line;
 
-      if (has_none_ttf) {
+      if (has_none_ttf && !is_non_ttf_quiet_) {
         logger_->Warn(
-            _ST("Found non-TTF fonts. Check the warnings above. Based on ASS "
-                "Specs, only Truetype fonts can be embedded in ASS scripts. "
-                "Ignored this error, but these fonts may not be loaded by some "
-                "video players."));
+            _ST("Embedded non-TTF fonts. Check the warnings above. The ASS "
+                "specs only allow TrueType fonts; libass-based players such as "
+                "mpv load them fine, but other renderers may not. To be safe, "
+                "convert them to .ttf (e.g. with otf2ttf) and embed again."));
       }
     } else {
       output_ass << line;
@@ -113,7 +117,11 @@ void AssFontEmbedder::WriteFonts(bool& has_none_ttf,
     fs::path font_path(font.subfont_path);
 
     if (ToLower(font_path.extension().native()) != _ST(".ttf")) {
-      logger_->Warn(_ST("\"{}\" is not a .ttf font."), font_path.native());
+      if (!is_non_ttf_quiet_) {
+        logger_->Warn(_ST("\"{}\" is not a TrueType (.ttf) font. Some "
+                          "players may not load it once embedded."),
+                      font_path.native());
+      }
       has_none_ttf = true;
     }
 

@@ -286,6 +286,8 @@ void MainWindow::InitConnects() {
             options["db_path"] = DbPath();
             options["multi_thread"] =
                 settings_->value("Run/MultiThread", false).toBool();
+            options["non_ttf_quiet"] =
+                !settings_->value("Run/WarnNonTtf", true).toBool();
             options["update_db"] =
                 process_page_->IsAutoUpdate() && !is_retry_pending_;
             options["fonts_dirs"] = library_page_->FontDirs();
