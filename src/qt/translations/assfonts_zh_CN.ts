@@ -766,6 +766,16 @@
         <source>Check for updates</source>
         <translation>检查更新</translation>
     </message>
+    <message>
+        <location filename="../main_window.cc" line="277" />
+        <source>Expand sidebar</source>
+        <translation>展开侧边栏</translation>
+    </message>
+    <message>
+        <location filename="../main_window.cc" line="277" />
+        <source>Collapse sidebar</source>
+        <translation>收起侧边栏</translation>
+    </message>
     <message numerus="yes">
         <location filename="../main_window.cc" line="284" />
         <source>Processing %n subtitle(s)</source>

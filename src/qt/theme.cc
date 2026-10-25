@@ -71,6 +71,7 @@ QPushButton[nav="true"] {
 }
 QPushButton[nav="true"]:hover { background: @border; }
 QPushButton[nav="true"]:checked { background: @card; color: @accent; font-weight: 600; }
+QWidget#sidebar[collapsed="true"] QPushButton[nav="true"] { padding: 0; text-align: center; }
 
 QFrame[card="true"] { background: @card; border: 1px solid @border; border-radius: 12px; }
 QFrame[card="true"] QLabel { background: transparent; }
@@ -278,6 +279,10 @@ const QHash<QString, QString>& IconSpecs() {
       {"chevron-up", "M 6 15 L 12 9 L 18 15"},
       {"monitor", "R 3 4 18 12 2 M 8 20 L 16 20 M 12 16 L 12 20"},
       {"globe", "O 12 12 9 M 3 12 L 21 12 A 12 12 9 90 0 M 12 3 L 12 21"},
+      {"sidebar-collapse",
+       "R 3 4 18 16 2 M 9 4 L 9 20 M 15.5 9.5 L 13 12 L 15.5 14.5"},
+      {"sidebar-expand",
+       "R 3 4 18 16 2 M 9 4 L 9 20 M 13 9.5 L 15.5 12 L 13 14.5"},
   };
   return specs;
 }
@@ -341,6 +346,15 @@ QPainterPath BuildPath(const QString& spec, bool& is_fill) {
 }  // namespace
 
 void Apply(QApplication& app, Mode mode) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
+  // Tells the platform too, so native parts such as the title bar match.
+  // Unknown hands the choice back to the system.
+  const Qt::ColorScheme scheme = mode == Mode::kLight  ? Qt::ColorScheme::Light
+                                 : mode == Mode::kDark ? Qt::ColorScheme::Dark
+                                                       : Qt::ColorScheme::Unknown;
+  QGuiApplication::styleHints()->setColorScheme(scheme);
+#endif
+
   switch (mode) {
     case Mode::kLight:
       g_is_dark = false;
