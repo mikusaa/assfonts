@@ -37,7 +37,9 @@
 #ifdef __linux__
 Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)
 Q_IMPORT_PLUGIN(QWaylandIntegrationPlugin)
+#ifdef ASSFONTS_WAYLAND_EGL
 Q_IMPORT_PLUGIN(QWaylandEglPlatformIntegrationPlugin)
+#endif
 Q_IMPORT_PLUGIN(QIbusPlatformInputContextPlugin)
 Q_IMPORT_PLUGIN(QComposePlatformInputContextPlugin)
 Q_IMPORT_PLUGIN(QFcitx5PlatformInputContextPlugin)
