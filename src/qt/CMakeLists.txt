@@ -50,11 +50,17 @@ set(CMAKE_AUTOUIC ON)
 add_executable(${TARGET_NAME} ${TARGET_SOURCES})
 
 if(LINUX)
-    qt_import_plugins(${TARGET_NAME} INCLUDE Qt::QXcbIntegrationPlugin
-                                             Qt::QWaylandIntegrationPlugin
-                                             Qt::QWaylandEglPlatformIntegrationPlugin
-                                             Qt::QIbusPlatformInputContextPlugin
-                                             Qt::QComposePlatformInputContextPlugin)
+    set(QT_PLATFORM_PLUGINS Qt::QXcbIntegrationPlugin
+                            Qt::QWaylandIntegrationPlugin
+                            Qt::QIbusPlatformInputContextPlugin
+                            Qt::QComposePlatformInputContextPlugin)
+    # Qt only builds wayland-egl when it finds libwayland-egl; without it the
+    # plain wayland plugin draws the widgets just as well.
+    if(TARGET Qt::QWaylandEglPlatformIntegrationPlugin)
+        list(APPEND QT_PLATFORM_PLUGINS Qt::QWaylandEglPlatformIntegrationPlugin)
+        target_compile_definitions(${TARGET_NAME} PRIVATE ASSFONTS_WAYLAND_EGL)
+    endif()
+    qt_import_plugins(${TARGET_NAME} INCLUDE ${QT_PLATFORM_PLUGINS})
 elseif(WIN32)
     qt_import_plugins(${TARGET_NAME} INCLUDE Qt::QWindowsIntegrationPlugin)
 elseif(APPLE)
