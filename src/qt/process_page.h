@@ -45,6 +45,11 @@ class ProcessPage : public QWidget {
   void AddPaths(const QStringList& paths);
 
   void OnCheckDone(const QStringList& inputs, const QString& json);
+
+  // Offers to import the missing fonts the pack provides into one of
+  // `library_dirs`.
+  void OnPackScanDone(const QString& pack_dir, const QString& json,
+                      const QStringList& library_dirs);
   void OnFileStarted(const QString& input);
   void OnFileDone(const QString& input, bool is_ok, const QString& error);
   void OnRunDone(bool is_stopped);
@@ -72,6 +77,8 @@ class ProcessPage : public QWidget {
                     QVariantMap options);
   void RequestStop();
   void RequestUpdateAndRetry(QStringList inputs);
+  void RequestPackScan(QStringList inputs, QString pack_dir);
+  void RequestImport(QStringList sources, QString target_dir);
   void RequestShowLibrary(QString search);
   void AutoUpdateChanged(bool is_auto_update);
 
@@ -145,6 +152,7 @@ class ProcessPage : public QWidget {
   QFrame* missing_card_;
   QLabel* missing_count_label_;
   QVBoxLayout* missing_list_layout_;
+  QPushButton* pack_button_;
   QPushButton* retry_button_;
 
   SegmentedControl* output_segment_;
@@ -183,6 +191,9 @@ class ProcessPage : public QWidget {
   void RemoveRow(int row);
   QVariantMap Options() const;
 
+  QStringList MissingInputs() const;
+
+  static bool SameKey(const FontKey& a, const FontKey& b);
   static QString StyleText(const FontKey& key);
   static QString FileList(const QStringList& files);
 };

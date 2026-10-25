@@ -373,166 +373,171 @@
     </message>
     <message>
         <location filename="../log_translator.cc" line="91" />
+        <source>Added %1 font files to the fonts database</source>
+        <translation>已把 %1 个字体文件加入字体库</translation>
+    </message>
+    <message>
+        <location filename="../log_translator.cc" line="96" />
         <source>Fonts database saved to "%1"</source>
         <translation>字体库已保存到「%1」</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="96" />
+        <location filename="../log_translator.cc" line="101" />
         <source>"%1" already exists and will be overwritten</source>
         <translation>「%1」已存在，将被覆盖</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="100" />
+        <location filename="../log_translator.cc" line="105" />
         <source>No font found, nothing to save</source>
         <translation>没有找到字体，未保存</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="103" />
+        <location filename="../log_translator.cc" line="108" />
         <source>Reading "%1"</source>
         <translation>读取「%1」</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="107" />
+        <location filename="../log_translator.cc" line="112" />
         <source>Detected file encoding: %1</source>
         <translation>检测到文件编码：%1</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="110" />
+        <location filename="../log_translator.cc" line="115" />
         <source>Cannot convert the file to UTF-8</source>
         <translation>无法把文件转换为 UTF-8</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="113" />
+        <location filename="../log_translator.cc" line="118" />
         <source>Cannot parse "%1": format error</source>
         <translation>无法解析「%1」：格式错误</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="118" />
+        <location filename="../log_translator.cc" line="123" />
         <source>Cannot parse "%1": wrong number of fields</source>
         <translation>无法解析「%1」：字段数量不对</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="124" />
+        <location filename="../log_translator.cc" line="129" />
         <source>Cannot parse "%1": no [Events] section</source>
         <translation>无法解析「%1」：缺少 [Events] 段</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="130" />
+        <location filename="../log_translator.cc" line="135" />
         <source>Cannot parse "%1": no [V4+ Styles] section</source>
         <translation>无法解析「%1」：缺少 [V4+ Styles] 段</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="135" />
+        <location filename="../log_translator.cc" line="140" />
         <source>Style "%1" is not defined (line %2)</source>
         <translation>样式「%1」未定义（第 %2 行）</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="140" />
+        <location filename="../log_translator.cc" line="145" />
         <source>Missing font "%1" (%2)</source>
         <translation>找不到字体「%1」（%2）</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="147" />
+        <location filename="../log_translator.cc" line="152" />
         <source>Found font "%1" (%2) → %3</source>
         <translation>找到字体「%1」（%2）→ %3</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="155" />
+        <location filename="../log_translator.cc" line="160" />
         <source>"%1" (%2) has no glyph for: %3</source>
         <translation>「%1」（%2）缺少这些字符：%3</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="163" />
+        <location filename="../log_translator.cc" line="168" />
         <source>Some fonts are missing, see the warnings above</source>
         <translation>有字体缺失，详见上方警告</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="167" />
+        <location filename="../log_translator.cc" line="172" />
         <source>Created folder for subset fonts "%1"</source>
         <translation>已创建子集字体文件夹「%1」</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="173" />
+        <location filename="../log_translator.cc" line="178" />
         <source>Cannot create folder for subset fonts: %1</source>
         <translation>无法创建子集字体文件夹：%1</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="178" />
+        <location filename="../log_translator.cc" line="183" />
         <source>Failed to subset "%1"</source>
         <translation>子集化失败：「%1」</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="182" />
+        <location filename="../log_translator.cc" line="187" />
         <source>Wrote subtitle with embedded fonts "%1"</source>
         <translation>已输出内嵌字体的字幕「%1」</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="187" />
+        <location filename="../log_translator.cc" line="192" />
         <source>Wrote subtitle with renamed fonts "%1"</source>
         <translation>已输出字体重命名的字幕「%1」</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="192" />
+        <location filename="../log_translator.cc" line="197" />
         <source>Cannot write file %1</source>
         <translation>无法写入文件 %1</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="196" />
+        <location filename="../log_translator.cc" line="201" />
         <source>HDR brightness adjustment failed: %1</source>
         <translation>HDR 亮度调整失败：%1</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="201" />
+        <location filename="../log_translator.cc" line="206" />
         <source>Wrote HDR-adjusted subtitle "%1"</source>
         <translation>已输出 HDR 亮度调整后的字幕「%1」</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="205" />
+        <location filename="../log_translator.cc" line="210" />
         <source>Cannot create "%1"</source>
         <translation>无法创建「%1」</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="209" />
+        <location filename="../log_translator.cc" line="214" />
         <source>Cannot open "%1"</source>
         <translation>无法打开「%1」</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="213" />
+        <location filename="../log_translator.cc" line="218" />
         <source>Cannot read the font name of "%1"</source>
         <translation>无法读取「%1」的字体名</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="217" />
+        <location filename="../log_translator.cc" line="222" />
         <source>Cannot access "%1"</source>
         <translation>无法访问「%1」</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="221" />
+        <location filename="../log_translator.cc" line="226" />
         <source>"%1" is not a TrueType font</source>
         <translation>「%1」不是 TrueType 字体</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="226" />
+        <location filename="../log_translator.cc" line="231" />
         <source>Failed to search for font files: %1</source>
         <translation>搜索字体文件失败：%1</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="229" />
+        <location filename="../log_translator.cc" line="234" />
         <source>No fonts database folder set</source>
         <translation>未设置字体库位置</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="231" />
+        <location filename="../log_translator.cc" line="236" />
         <source>No font folder added</source>
         <translation>还没有添加字体目录</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="233" />
+        <location filename="../log_translator.cc" line="238" />
         <source>No subtitle file added</source>
         <translation>还没有添加字幕文件</translation>
     </message>
     <message>
-        <location filename="../log_translator.cc" line="235" />
+        <location filename="../log_translator.cc" line="240" />
         <source>No output folder set</source>
         <translation>未设置输出文件夹</translation>
     </message>
@@ -565,451 +570,534 @@
         <translation>检查更新</translation>
     </message>
     <message numerus="yes">
-        <location filename="../main_window.cc" line="275" />
+        <location filename="../main_window.cc" line="284" />
         <source>Processing %n subtitle(s)</source>
         <translation><numerusform>处理 %n 个字幕</numerusform></translation>
     </message>
+    <message numerus="yes">
+        <location filename="../main_window.cc" line="316" />
+        <source>Importing %n font file(s)</source>
+        <translation><numerusform>导入 %n 个字体文件</numerusform></translation>
+    </message>
     <message>
-        <location filename="../main_window.cc" line="405" />
+        <location filename="../main_window.cc" line="426" />
         <source>Rebuilding font library</source>
         <translation>完全重建字体库</translation>
     </message>
     <message>
-        <location filename="../main_window.cc" line="406" />
+        <location filename="../main_window.cc" line="427" />
         <source>Updating font library</source>
         <translation>更新字体库</translation>
     </message>
     <message>
-        <location filename="../main_window.cc" line="426" />
+        <location filename="../main_window.cc" line="447" />
         <source>Still working</source>
         <translation>正在处理</translation>
     </message>
     <message>
-        <location filename="../main_window.cc" line="427" />
+        <location filename="../main_window.cc" line="448" />
         <source>Please wait until the current task finishes.</source>
         <translation>请等当前任务完成后再操作。</translation>
     </message>
     <message>
-        <location filename="../main_window.cc" line="429" />
+        <location filename="../main_window.cc" line="450" />
         <source>OK</source>
         <translation>好</translation>
     </message>
 </context>
 <context>
+    <name>PackImportDialog</name>
+    <message>
+        <location filename="../pack_dialog.cc" line="40" />
+        <source>Import from font pack</source>
+        <translation>从字体包导入</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../pack_dialog.cc" line="48" />
+        <source>%n missing font(s) found in the pack</source>
+        <translation><numerusform>在字体包中找到 %n 个缺失的字体</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../pack_dialog.cc" line="94" />
+        <source>lacks %n character(s)</source>
+        <translation><numerusform>缺 %n 个字</numerusform></translation>
+    </message>
+    <message>
+        <location filename="../pack_dialog.cc" line="119" />
+        <source>Not in this pack: %1</source>
+        <translation>字体包中没有：%1</translation>
+    </message>
+    <message>
+        <location filename="../pack_dialog.cc" line="119" />
+        <source>, </source>
+        <translation>、</translation>
+    </message>
+    <message>
+        <location filename="../pack_dialog.cc" line="127" />
+        <location filename="../pack_dialog.cc" line="134" />
+        <source>Copy to</source>
+        <translation>复制到</translation>
+    </message>
+    <message>
+        <location filename="../pack_dialog.cc" line="141" />
+        <source>Files are copied, the pack is left as it is. The copies are added to the library and the subtitles are checked again.</source>
+        <translation>只复制文件，不改动字体包。复制的字体会加入字体库，然后重新检查字幕。</translation>
+    </message>
+    <message>
+        <location filename="../pack_dialog.cc" line="148" />
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../pack_dialog.cc" line="179" />
+        <source>Import %n file(s)</source>
+        <translation><numerusform>导入 %n 个文件</numerusform></translation>
+    </message>
+</context>
+<context>
     <name>ProcessPage</name>
     <message>
-        <location filename="../process_page.cc" line="58" />
+        <location filename="../process_page.cc" line="60" />
         <source>just now</source>
         <translation>刚刚</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="61" />
+        <location filename="../process_page.cc" line="63" />
         <source>%1 min ago</source>
         <translation>%1 分钟前</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="64" />
+        <location filename="../process_page.cc" line="66" />
         <source>%1 h ago</source>
         <translation>%1 小时前</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="134" />
+        <location filename="../process_page.cc" line="136" />
         <source>Process subtitles</source>
         <translation>处理字幕</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="136" />
+        <location filename="../process_page.cc" line="138" />
         <source>Drop subtitles or whole folders here. The fonts they use are subset and embedded automatically.</source>
         <translation>拖入字幕文件或整个文件夹，自动找出所需字体、子集化后嵌入字幕。</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="141" />
+        <location filename="../process_page.cc" line="143" />
         <source>Clear list</source>
         <translation>清空列表</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="165" />
+        <location filename="../process_page.cc" line="167" />
         <source>Subtitle files</source>
         <translation>字幕文件</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="170" />
+        <location filename="../process_page.cc" line="172" />
         <source>Add files</source>
         <translation>添加文件</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="171" />
+        <location filename="../process_page.cc" line="173" />
         <source>Add folder</source>
         <translation>添加文件夹</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="179" />
+        <location filename="../process_page.cc" line="181" />
         <source>File</source>
         <translation>文件名</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="179" />
+        <location filename="../process_page.cc" line="181" />
         <source>Fonts</source>
         <translation>字体数</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="179" />
+        <location filename="../process_page.cc" line="181" />
         <source>Status</source>
         <translation>状态</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="218" />
+        <location filename="../process_page.cc" line="220" />
         <source>Choose subtitle files</source>
         <translation>选择字幕文件</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="219" />
+        <location filename="../process_page.cc" line="221" />
         <source>ASS subtitles (*.ass *.ssa)</source>
         <translation>ASS 字幕 (*.ass *.ssa)</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="231" />
+        <location filename="../process_page.cc" line="233" />
         <source>Choose a folder with subtitles</source>
         <translation>选择字幕所在文件夹</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="250" />
+        <location filename="../process_page.cc" line="252" />
         <source>Missing fonts</source>
         <translation>缺失字体</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="254" />
+        <location filename="../process_page.cc" line="256" />
         <source>Copy all names</source>
         <translation>复制全部名称</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="279" />
         <source>Put the fonts into any font folder of the library, then update the library and process the affected files again.</source>
         <translation>把字体放进字体库的任一目录，然后更新字体库并重新处理这些文件。</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="314" />
+        <location filename="../process_page.cc" line="281" />
+        <source>Pick the font pack that came with the subtitles to import the missing fonts from it. Or put the fonts into any font folder of the library, then update the library and process the affected files again.</source>
+        <translation>选择字幕附带的字体包，从中导入缺失的字体。也可以自己把字体放进字体库的任一目录，然后更新字体库并重新处理这些文件。</translation>
+    </message>
+    <message>
+        <location filename="../process_page.cc" line="290" />
+        <source>Import from font pack…</source>
+        <translation>从字体包导入…</translation>
+    </message>
+    <message>
+        <location filename="../process_page.cc" line="315" />
+        <source>Choose the font pack folder</source>
+        <translation>选择字体包所在文件夹</translation>
+    </message>
+    <message>
+        <location filename="../process_page.cc" line="335" />
         <source>Options</source>
         <translation>处理选项</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="323" />
+        <location filename="../process_page.cc" line="344" />
         <source>Output location</source>
         <translation>输出位置</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="325" />
+        <location filename="../process_page.cc" line="346" />
         <source>Next to subtitle</source>
         <translation>与字幕相同</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="325" />
+        <location filename="../process_page.cc" line="346" />
         <source>Choose folder</source>
         <translation>指定文件夹</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="333" />
+        <location filename="../process_page.cc" line="354" />
         <source>Output folder</source>
         <translation>输出文件夹</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="334" />
+        <location filename="../process_page.cc" line="355" />
         <source>Browse…</source>
         <translation>浏览…</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="340" />
+        <location filename="../process_page.cc" line="361" />
         <source>Each result is written to the folder of its subtitle.</source>
         <translation>结果输出到各字幕所在的文件夹。</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="347" />
+        <location filename="../process_page.cc" line="368" />
         <source>Processing</source>
         <translation>处理方式</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="349" />
+        <location filename="../process_page.cc" line="370" />
         <source>Subset and embed</source>
         <translation>子集化并嵌入</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="349" />
+        <location filename="../process_page.cc" line="370" />
         <source>Subset only</source>
         <translation>仅子集化</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="349" />
+        <location filename="../process_page.cc" line="370" />
         <source>Embed only</source>
         <translation>仅嵌入</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="352" />
+        <location filename="../process_page.cc" line="373" />
         <source>Subset only writes the font files; embed only puts whole fonts into the subtitle.</source>
         <translation>仅子集化：只输出子集字体文件；仅嵌入：把完整字体嵌入字幕。</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="360" />
+        <location filename="../process_page.cc" line="381" />
         <source>HDR brightness</source>
         <translation>HDR 亮度调整</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="362" />
+        <location filename="../process_page.cc" line="383" />
         <source>Off</source>
         <translation>关闭</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="362" />
+        <location filename="../process_page.cc" line="383" />
         <source>Low · 100 nit</source>
         <translation>低 · 100 nit</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="362" />
+        <location filename="../process_page.cc" line="383" />
         <source>High · 203 nit</source>
         <translation>高 · 203 nit</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="365" />
+        <location filename="../process_page.cc" line="386" />
         <source>Lowers subtitle brightness for HDR video.</source>
         <translation>为 HDR 视频降低字幕亮度。</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="372" />
+        <location filename="../process_page.cc" line="393" />
         <source>Rename subset fonts</source>
         <translation>子集字体重命名</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="373" />
+        <location filename="../process_page.cc" line="394" />
         <source>Gives every subtitle its own set of fonts so players never mix them up.</source>
         <translation>保证每个字幕对应一套独立的子集字体，避免播放器串字。</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="376" />
+        <location filename="../process_page.cc" line="397" />
         <source>Combine shared fonts (experimental)</source>
         <translation>合并同名子集字体（实验性）</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="377" />
+        <location filename="../process_page.cc" line="398" />
         <source>Subtitles using the same font share one subset.</source>
         <translation>多个字幕用到同一字体时，合成一份子集。</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="396" />
+        <location filename="../process_page.cc" line="417" />
         <source>Choose output folder</source>
         <translation>选择输出文件夹</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="425" />
-        <location filename="../process_page.cc" line="427" />
+        <location filename="../process_page.cc" line="446" />
+        <location filename="../process_page.cc" line="448" />
         <source>Update library before processing</source>
         <translation>处理前自动更新字体库</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="430" />
+        <location filename="../process_page.cc" line="451" />
         <source>Manage library</source>
         <translation>管理字体库</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="460" />
+        <location filename="../process_page.cc" line="481" />
         <source>Open output folder</source>
         <translation>打开输出文件夹</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="462" />
+        <location filename="../process_page.cc" line="483" />
         <source>Check fonts only</source>
         <translation>只检查字体</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="464" />
-        <location filename="../process_page.cc" line="673" />
+        <location filename="../process_page.cc" line="485" />
+        <location filename="../process_page.cc" line="786" />
         <source>Start</source>
         <translation>开始处理</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="482" />
+        <location filename="../process_page.cc" line="503" />
         <source>Stopping…</source>
         <translation>正在停止…</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="692" />
+        <location filename="../process_page.cc" line="712" />
+        <source>Import from font pack</source>
+        <translation>从字体包导入</translation>
+    </message>
+    <message>
+        <location filename="../process_page.cc" line="717" />
+        <source>None of the missing fonts are in "%1".</source>
+        <translation>「%1」中没有任何缺失的字体。</translation>
+    </message>
+    <message>
+        <location filename="../process_page.cc" line="725" />
+        <source>Add a font folder to the font library first. Imported fonts are copied into one of its folders.</source>
+        <translation>请先在字体库中添加一个字体文件夹，导入的字体会复制到其中一个文件夹里。</translation>
+    </message>
+    <message>
+        <location filename="../process_page.cc" line="806" />
         <source>Font library · %1 folders · %2 fonts</source>
         <translation>字体库 · %1 个目录 · %2 个字体</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="697" />
+        <location filename="../process_page.cc" line="811" />
         <source>No library yet. Add your font folders in Font library.</source>
         <translation>还没有字体库，请先在「字体库」里添加字体目录。</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="700" />
+        <location filename="../process_page.cc" line="814" />
         <source>Updated %1</source>
         <translation>%1更新</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="801" />
+        <location filename="../process_page.cc" line="915" />
         <source>Not checked</source>
         <translation>未检查</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="804" />
+        <location filename="../process_page.cc" line="918" />
         <source>Checking…</source>
         <translation>检查中…</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="807" />
+        <location filename="../process_page.cc" line="921" />
         <source>All fonts found</source>
         <translation>字体齐全</translation>
     </message>
     <message numerus="yes">
-        <location filename="../process_page.cc" line="810" />
+        <location filename="../process_page.cc" line="924" />
         <source>%n font(s) missing</source>
         <translation><numerusform>缺 %n 个字体</numerusform></translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="814" />
+        <location filename="../process_page.cc" line="928" />
         <source>Cannot read</source>
         <translation>无法读取</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="817" />
+        <location filename="../process_page.cc" line="931" />
         <source>Processing…</source>
         <translation>处理中…</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="820" />
+        <location filename="../process_page.cc" line="934" />
         <source>Done</source>
         <translation>完成</translation>
     </message>
     <message numerus="yes">
-        <location filename="../process_page.cc" line="825" />
+        <location filename="../process_page.cc" line="939" />
         <source>%n font(s) missing, not written</source>
         <translation><numerusform>缺 %n 个字体，未输出</numerusform></translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="829" />
+        <location filename="../process_page.cc" line="943" />
         <source>Failed</source>
         <translation>失败</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="833" />
+        <location filename="../process_page.cc" line="947" />
         <source>Skipped</source>
         <translation>已跳过</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="874" />
+        <location filename="../process_page.cc" line="988" />
         <source>Remove</source>
         <translation>移除</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="875" />
+        <location filename="../process_page.cc" line="989" />
         <source>Remove %1</source>
         <translation>移除 %1</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="894" />
+        <location filename="../process_page.cc" line="1008" />
         <source>Drop .ass / .ssa files or whole folders here
 A whole season can be processed at once</source>
         <translation>把 .ass / .ssa 文件或整个文件夹拖到这里
 一次可以处理一整季</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="896" />
+        <location filename="../process_page.cc" line="1010" />
         <source>Drop more files or folders here</source>
         <translation>继续拖入文件或文件夹</translation>
     </message>
     <message numerus="yes">
-        <location filename="../process_page.cc" line="973" />
+        <location filename="../process_page.cc" line="1084" />
         <source>Used in %1 · %n character(s)</source>
         <translation><numerusform>用于 %1 · 共 %n 个字</numerusform></translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="983" />
+        <location filename="../process_page.cc" line="1094" />
         <source>Similar fonts in your library: %1</source>
         <translation>字体库里有相近的字体：%1</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="983" />
-        <location filename="../process_page.cc" line="1202" />
+        <location filename="../process_page.cc" line="1094" />
+        <location filename="../process_page.cc" line="1329" />
         <source>, </source>
         <translation>、</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="992" />
+        <location filename="../process_page.cc" line="1103" />
         <source>Copy name</source>
         <translation>复制名称</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="993" />
+        <location filename="../process_page.cc" line="1104" />
         <source>Search the web</source>
         <translation>在网上搜索</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="994" />
+        <location filename="../process_page.cc" line="1105" />
         <source>Find in library</source>
         <translation>在字体库里查找</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="1007" />
+        <location filename="../process_page.cc" line="1118" />
         <source>font</source>
         <translation>字体</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="1023" />
+        <location filename="../process_page.cc" line="1134" />
         <source>Missing characters</source>
         <translation>缺少字符</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="1025" />
+        <location filename="../process_page.cc" line="1136" />
         <source>These fonts were found but lack some characters. Players may show boxes for them; processing still works.</source>
         <translation>这些字体找到了，但缺少部分字符，播放时可能显示为方框，不影响输出。</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="1041" />
+        <location filename="../process_page.cc" line="1152" />
         <source>… %1 more</source>
         <translation>… 另有 %1 个</translation>
     </message>
     <message numerus="yes">
-        <location filename="../process_page.cc" line="1065" />
+        <location filename="../process_page.cc" line="1176" />
         <source>Update library and retry %n file(s)</source>
         <translation><numerusform>更新字体库并重试 %n 个文件</numerusform></translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="1080" />
+        <location filename="../process_page.cc" line="1192" />
         <source>Add subtitles to get started.</source>
         <translation>添加字幕后即可开始。</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="1086" />
+        <location filename="../process_page.cc" line="1198" />
         <source>Processing %1 of %2…</source>
         <translation>正在处理第 %1 / %2 个…</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="1114" />
+        <location filename="../process_page.cc" line="1226" />
         <source>Finished: %1 succeeded · %2 missing fonts · %3 failed</source>
         <translation>处理完成：成功 %1 · 缺字体 %2 · 失败 %3</translation>
     </message>
     <message numerus="yes">
-        <location filename="../process_page.cc" line="1120" />
-        <location filename="../process_page.cc" line="1124" />
+        <location filename="../process_page.cc" line="1232" />
+        <location filename="../process_page.cc" line="1236" />
         <source>%n file(s)</source>
         <translation><numerusform>%n 个文件</numerusform></translation>
     </message>
     <message numerus="yes">
-        <location filename="../process_page.cc" line="1121" />
+        <location filename="../process_page.cc" line="1233" />
         <source>%n file(s) are missing fonts; add them first or process the rest</source>
         <translation><numerusform>%n 个文件缺字体，可先补齐再处理</numerusform></translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="1137" />
+        <location filename="../process_page.cc" line="1249" />
         <source>Choose an output folder first.</source>
         <translation>请先选择输出文件夹。</translation>
     </message>
     <message>
-        <location filename="../process_page.cc" line="1162" />
+        <location filename="../process_page.cc" line="1274" />
         <source>Stop</source>
         <translation>停止</translation>
     </message>
     <message numerus="yes">
-        <location filename="../process_page.cc" line="1204" />
+        <location filename="../process_page.cc" line="1331" />
         <source>%1, %2 and %n more</source>
         <translation><numerusform>%1、%2 等 %n 个</numerusform></translation>
     </message>
@@ -1192,18 +1280,43 @@ A whole season can be processed at once</source>
 <context>
     <name>TaskRunner</name>
     <message>
-        <location filename="../task_runner.cc" line="105" />
-        <location filename="../task_runner.cc" line="155" />
+        <location filename="../task_runner.cc" line="106" />
+        <location filename="../task_runner.cc" line="252" />
         <source>Updating fonts database…</source>
         <translation>正在更新字体库…</translation>
     </message>
     <message>
-        <location filename="../task_runner.cc" line="124" />
+        <location filename="../task_runner.cc" line="125" />
         <source>Checking fonts…</source>
         <translation>正在检查字体…</translation>
     </message>
     <message>
-        <location filename="../task_runner.cc" line="160" />
+        <location filename="../task_runner.cc" line="147" />
+        <source>Searching the font pack…</source>
+        <translation>正在查找字体包…</translation>
+    </message>
+    <message>
+        <location filename="../task_runner.cc" line="165" />
+        <source>Importing fonts…</source>
+        <translation>正在导入字体…</translation>
+    </message>
+    <message>
+        <location filename="../task_runner.cc" line="193" />
+        <source>"%1" is already in "%2"</source>
+        <translation>「%1」已在「%2」中</translation>
+    </message>
+    <message>
+        <location filename="../task_runner.cc" line="212" />
+        <source>Copied "%1" to "%2"</source>
+        <translation>已把「%1」复制到「%2」</translation>
+    </message>
+    <message>
+        <location filename="../task_runner.cc" line="216" />
+        <source>Cannot copy "%1" to "%2"</source>
+        <translation>无法把「%1」复制到「%2」</translation>
+    </message>
+    <message>
+        <location filename="../task_runner.cc" line="257" />
         <source>Processing subtitles…</source>
         <translation>正在处理字幕…</translation>
     </message>

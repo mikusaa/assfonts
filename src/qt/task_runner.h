@@ -54,6 +54,15 @@ class TaskRunner : public QObject {
 
   void OnCheckRun(const QStringList inputs, const QString db_path);
 
+  // Checks the inputs against the fonts in `pack_dir` only.
+  void OnPackScanRun(const QStringList inputs, const QString pack_dir);
+
+  // Copies the font files into `target_dir` and adds the copies to the fonts
+  // database. A file already there with the same content is reused; one with
+  // different content is kept and the copy gets a new name.
+  void OnImportRun(const QStringList sources, const QString target_dir,
+                   const QString db_path);
+
   // `outputs` holds the output folder of each input. Options: db_path,
   // brightness, subset_only, embed_only, rename, combined, multi_thread,
   // update_db and fonts_dirs (used when update_db is set).
@@ -65,6 +74,7 @@ class TaskRunner : public QObject {
   void OnSendBusy(bool is_busy, QString what);
   void OnSendBuildDone();
   void OnSendCheckDone(QStringList inputs, QString json);
+  void OnSendPackScanDone(QString pack_dir, QString json);
   void OnSendFileStarted(QString input);
   void OnSendFileDone(QString input, bool is_ok, QString error);
   void OnSendStartDone(bool is_stopped);

@@ -86,6 +86,11 @@ QString LogTranslator::Translate(const QString& msg) {
        [](const Match& m) {
          return tr("Cannot read fonts database \"%1\"").arg(m.captured(1));
        }},
+      {QRegularExpression("^Added (\\d+) font files to the fonts database\\.$"),
+       [](const Match& m) {
+         return tr("Added %1 font files to the fonts database")
+             .arg(m.captured(1));
+       }},
       {QRegularExpression("^Fonts database has been saved in " QUOTED "$"),
        [](const Match& m) {
          return tr("Fonts database saved to \"%1\"").arg(m.captured(1));

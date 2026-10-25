@@ -47,6 +47,8 @@ class MainWindow : public QMainWindow {
 
   void OnSendBuild(QStringList fonts_dirs, QString db_path, bool is_rebuild);
   void OnSendCheck(QStringList inputs, QString db_path);
+  void OnSendPackScan(QStringList inputs, QString pack_dir);
+  void OnSendImport(QStringList sources, QString target_dir, QString db_path);
   void OnSendStart(QStringList inputs, QStringList outputs,
                    QVariantMap options);
 
