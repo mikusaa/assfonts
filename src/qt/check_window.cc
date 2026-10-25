@@ -23,10 +23,10 @@
 
 #include <assfonts.h>
 
+// Releases come from this fork; upstream (wyzdwdz/assfonts and its Gitee
+// mirror) stopped at 0.7.3.
 constexpr char DOWNLOAD_URL[] =
-    "https://github.com/wyzdwdz/assfonts/releases/latest";
-constexpr char DOWNLOAD_URL_BACKUP[] =
-    "https://gitee.com/wyzdwdz/assfonts/releases/latest";
+    "https://github.com/mikusaa/assfonts/releases/latest";
 
 void CheckWindow::InitLayout() {
   QGridLayout* main_layout = new QGridLayout;
@@ -87,44 +87,15 @@ void CheckWindow::InitConcurrents() {
 QString CheckWindow::GetLatestVersion() {
   httplib::Client client("https://raw.githubusercontent.com");
 
-  auto res = client.Get("/wyzdwdz/assfonts/HEAD/VERSION");
+  auto res = client.Get("/mikusaa/assfonts/HEAD/VERSION");
 
   if (res && res->status == 200) {
     return QString::fromStdString(res->body).trimmed();
-  }
-
-  httplib::Client client_backup("https://gitee.com");
-
-  auto res_backup = client_backup.Get("/wyzdwdz/assfonts/raw/HEAD/VERSION");
-
-  if (res_backup && res_backup->status == 200) {
-    return QString::fromStdString(res_backup->body).trimmed();
   }
 
   return tr("Not found");
 }
 
 QString CheckWindow::GetDownloadLink() {
-  httplib::Client client("https://github.com");
-  client.set_follow_location(true);
-  client.set_connection_timeout(1);
-
-  auto res = client.Head("/wyzdwdz/assfonts/releases/latest/");
-
-  if (res && res->status == 200) {
-    return QString("<a href=\"") + DOWNLOAD_URL + "\">" + DOWNLOAD_URL + "</a>";
-  }
-
-  httplib::Client client_backup("https://gitee.com");
-  client_backup.set_follow_location(true);
-  client_backup.set_connection_timeout(1);
-
-  auto res_backup = client_backup.Head("/wyzdwdz/assfonts/releases/latest/");
-
-  if (res_backup && res_backup->status == 200) {
-    return QString("<a href=\"") + DOWNLOAD_URL_BACKUP + "\">" +
-           DOWNLOAD_URL_BACKUP + "</a>";
-  }
-
   return QString("<a href=\"") + DOWNLOAD_URL + "\">" + DOWNLOAD_URL + "</a>";
 }
