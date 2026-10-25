@@ -19,10 +19,13 @@
 
 #pragma once
 
+#include <QBoxLayout>
 #include <QButtonGroup>
 #include <QMainWindow>
+#include <QPushButton>
 #include <QSettings>
 #include <QStackedWidget>
+#include <QVariantAnimation>
 
 #include "check_window.h"
 #include "font_db.h"
@@ -61,6 +64,14 @@ class MainWindow : public QMainWindow {
   FontDatabase font_db_;
   TaskRunner* worker_;
 
+  QWidget* sidebar_;
+  QBoxLayout* brand_layout_;
+  QWidget* brand_texts_;
+  QWidget* sidebar_footer_;
+  QPushButton* collapse_button_;
+  QVariantAnimation* sidebar_anim_;
+  bool is_sidebar_collapsed_ = false;
+
   QButtonGroup* nav_group_;
   QStackedWidget* stack_;
   ProcessPage* process_page_;
@@ -74,6 +85,10 @@ class MainWindow : public QMainWindow {
 
   QWidget* InitSidebar();
   void InitConnects();
+
+  // Shrinks the sidebar to its icons, or brings the labels back.
+  void SetSidebarCollapsed(bool is_collapsed, bool is_animated);
+  void UpdateSidebarContent();
 
   QString DbPath() const;
   void ReloadDatabase();

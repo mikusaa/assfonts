@@ -25,6 +25,7 @@
 #include <QDir>
 #include <QMessageBox>
 #include <QMetaType>
+#include <QStyleHints>
 #include <QUrl>
 #include <ghc/filesystem.hpp>
 
@@ -38,6 +39,14 @@
 #include "theme.h"
 
 namespace fs = ghc::filesystem;
+
+namespace {
+
+constexpr int kSidebarWidth = 208;
+// Room for the 40px nav buttons and the sidebar's 12px margins.
+constexpr int kSidebarCollapsedWidth = 64;
+
+}  // namespace
 
 static std::string SAVE_FILES_PATH = []() {
   fs::path path = fs::current_path();
@@ -136,30 +145,32 @@ MainWindow::MainWindow(QSettings* settings, QWidget* parent)
 }
 
 QWidget* MainWindow::InitSidebar() {
-  auto* sidebar = new QWidget;
-  sidebar->setObjectName("sidebar");
-  sidebar->setAttribute(Qt::WA_StyledBackground);
-  sidebar->setFixedWidth(208);
+  sidebar_ = new QWidget;
+  sidebar_->setObjectName("sidebar");
+  sidebar_->setAttribute(Qt::WA_StyledBackground);
+  sidebar_->setFixedWidth(kSidebarWidth);
 
-  auto* layout = new QVBoxLayout(sidebar);
+  auto* layout = new QVBoxLayout(sidebar_);
   layout->setContentsMargins(12, 18, 12, 12);
   layout->setSpacing(4);
 
-  auto* brand = new QHBoxLayout;
-  brand->setContentsMargins(8, 0, 8, 18);
-  brand->setSpacing(10);
+  brand_layout_ = new QHBoxLayout;
+  brand_layout_->setContentsMargins(8, 0, 8, 18);
+  brand_layout_->setSpacing(10);
   auto* logo = new QLabel;
   logo->setPixmap(QIcon(":/icon.png").pixmap(32, 32));
   logo->setFixedSize(32, 32);
-  brand->addWidget(logo);
-  auto* brand_texts = new QVBoxLayout;
+  brand_layout_->addWidget(logo);
+  brand_texts_ = new QWidget;
+  auto* brand_texts = new QVBoxLayout(brand_texts_);
+  brand_texts->setContentsMargins(0, 0, 0, 0);
   brand_texts->setSpacing(0);
   auto* name = new QLabel("assfonts");
   name->setObjectName("brandName");
   brand_texts->addWidget(name);
   brand_texts->addWidget(ui::Label(tr("Subtitle font embedding"), "caption"));
-  brand->addLayout(brand_texts, 1);
-  layout->addLayout(brand);
+  brand_layout_->addWidget(brand_texts_, 1);
+  layout->addLayout(brand_layout_);
 
   nav_group_ = new QButtonGroup(this);
   nav_group_->setExclusive(true);
@@ -172,6 +183,8 @@ QWidget* MainWindow::InitSidebar() {
   for (int idx = 0; idx < items.size(); ++idx) {
     auto* button = new QPushButton;
     button->setText(items.at(idx).first);
+    button->setAccessibleName(items.at(idx).first);
+    button->setProperty("navText", items.at(idx).first);
     button->setProperty("nav", true);
     button->setProperty("iconName", items.at(idx).second);
     button->setProperty("iconPx", 18);
@@ -188,8 +201,9 @@ QWidget* MainWindow::InitSidebar() {
 
   layout->addStretch();
 
-  auto* footer = new QHBoxLayout;
-  footer->setContentsMargins(10, 0, 10, 0);
+  sidebar_footer_ = new QWidget;
+  auto* footer = new QHBoxLayout(sidebar_footer_);
+  footer->setContentsMargins(10, 0, 10, 4);
   footer->addWidget(ui::Label(QString("v%1.%2.%3")
                                   .arg(ASSFONTS_VERSION_MAJOR)
                                   .arg(ASSFONTS_VERSION_MINOR)
@@ -198,14 +212,80 @@ QWidget* MainWindow::InitSidebar() {
   footer->addStretch();
   auto* update_button = ui::Button(tr("Check for updates"), "link");
   footer->addWidget(update_button);
-  layout->addLayout(footer);
+  layout->addWidget(sidebar_footer_);
+
+  // Kept last, so it stays in the same corner in both states.
+  collapse_button_ = new QPushButton;
+  collapse_button_->setProperty("nav", true);
+  collapse_button_->setProperty("iconPx", 18);
+  collapse_button_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+  collapse_button_->setCursor(Qt::PointingHandCursor);
+  layout->addWidget(collapse_button_);
+
+  sidebar_anim_ = new QVariantAnimation(this);
+  sidebar_anim_->setDuration(160);
+  sidebar_anim_->setEasingCurve(QEasingCurve::OutCubic);
 
   connect(nav_group_, &QButtonGroup::idClicked, this, &MainWindow::ShowPage);
   connect(update_button, &QPushButton::clicked, this,
           &MainWindow::ShowCheckWindow);
+  connect(collapse_button_, &QPushButton::clicked, this, [this]() {
+    SetSidebarCollapsed(!is_sidebar_collapsed_, true);
+  });
+  connect(sidebar_anim_, &QVariantAnimation::valueChanged, this,
+          [this](const QVariant& value) {
+            sidebar_->setFixedWidth(value.toInt());
+          });
 
-  ui::RefreshIcons(sidebar);
-  return sidebar;
+  UpdateSidebarContent();
+  return sidebar_;
+}
+
+void MainWindow::SetSidebarCollapsed(bool is_collapsed, bool is_animated) {
+  is_sidebar_collapsed_ = is_collapsed;
+  // The labels go first, so they never wrap while the width changes.
+  UpdateSidebarContent();
+
+  const int target = is_collapsed ? kSidebarCollapsedWidth : kSidebarWidth;
+  sidebar_anim_->stop();
+  if (!is_animated) {
+    sidebar_->setFixedWidth(target);
+    return;
+  }
+  sidebar_anim_->setStartValue(sidebar_->width());
+  sidebar_anim_->setEndValue(target);
+  sidebar_anim_->start();
+}
+
+void MainWindow::UpdateSidebarContent() {
+  const bool is_collapsed = is_sidebar_collapsed_;
+
+  sidebar_->setProperty("collapsed", is_collapsed);
+  brand_texts_->setVisible(!is_collapsed);
+  sidebar_footer_->setVisible(!is_collapsed);
+  brand_layout_->setContentsMargins(is_collapsed ? 4 : 8, 0,
+                                    is_collapsed ? 4 : 8, 18);
+
+  // Collapsed, the labels move into tooltips.
+  for (auto* button : nav_group_->buttons()) {
+    const QString text = button->property("navText").toString();
+    button->setText(is_collapsed ? QString() : text);
+    button->setToolTip(is_collapsed ? text : QString());
+  }
+
+  const QString toggle_text =
+      is_collapsed ? tr("Expand sidebar") : tr("Collapse sidebar");
+  collapse_button_->setText(is_collapsed ? QString() : toggle_text);
+  collapse_button_->setToolTip(is_collapsed ? toggle_text : QString());
+  collapse_button_->setAccessibleName(toggle_text);
+  collapse_button_->setProperty(
+      "iconName", is_collapsed ? "sidebar-expand" : "sidebar-collapse");
+
+  ui::Repolish(sidebar_);
+  for (auto* button : sidebar_->findChildren<QPushButton*>()) {
+    ui::Repolish(button);
+  }
+  ui::RefreshIcons(sidebar_);
 }
 
 void MainWindow::InitConnects() {
@@ -370,6 +450,16 @@ void MainWindow::InitConnects() {
   connect(settings_page_, &SettingsPage::ThemeChanged, this,
           &MainWindow::ApplyTheme);
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+  // Follows the system switching between light and dark while running.
+  connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged,
+          this, [this]() {
+            if (settings_->value("General/Theme", 0).toInt() == 0) {
+              ApplyTheme();
+            }
+          });
+#endif
+
   connect(settings_page_, &SettingsPage::DatabaseDirChanged, this,
           [this]() { ReloadDatabase(); });
 
@@ -465,6 +555,8 @@ void MainWindow::closeEvent(QCloseEvent* event) {
 }
 
 void MainWindow::changeEvent(QEvent* event) {
+#if QT_VERSION < QT_VERSION_CHECK(6, 5, 0)
+  // Newer Qt reports this through QStyleHints::colorSchemeChanged instead.
   if (event->type() == QEvent::ThemeChange &&
       settings_->value("General/Theme", 0).toInt() == 0) {
     const bool was_dark = theme::IsDark();
@@ -473,6 +565,7 @@ void MainWindow::changeEvent(QEvent* event) {
       ApplyTheme();
     }
   }
+#endif
 
   QMainWindow::changeEvent(event);
 }
@@ -483,6 +576,8 @@ void MainWindow::LoadSettings() {
   } else {
     resize(1180, 860);
   }
+  SetSidebarCollapsed(
+      settings_->value("MainWindow/SidebarCollapsed", false).toBool(), false);
 
   const bool is_auto_update =
       settings_->value("Library/AutoUpdate", true).toBool();
@@ -495,6 +590,7 @@ void MainWindow::LoadSettings() {
 
 void MainWindow::SaveSettings() {
   settings_->setValue("MainWindow/Geometry", saveGeometry());
+  settings_->setValue("MainWindow/SidebarCollapsed", is_sidebar_collapsed_);
   settings_->setValue("Log/Expanded", log_panel_->IsExpanded());
   process_page_->SaveSettings();
   library_page_->SaveSettings();
