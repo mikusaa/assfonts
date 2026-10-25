@@ -38,6 +38,7 @@
 #include <QMessageBox>
 #include <QMimeData>
 #include <QScrollArea>
+#include <QScrollBar>
 #include <QUrl>
 #include <QUrlQuery>
 
@@ -82,21 +83,33 @@ ProcessPage::ProcessPage(QSettings* settings, const FontDatabase* font_db,
 
   auto* outer = new QVBoxLayout(this);
   outer->setContentsMargins(0, 0, 0, 0);
+  outer->setSpacing(0);
+
+  // The run buttons stay at the top while the page scrolls under them.
+  outer->addWidget(InitHeader());
+
+  // A line under the bar once the cards scroll beneath it.
+  auto* divider = ui::Divider();
+  QSizePolicy policy = divider->sizePolicy();
+  policy.setRetainSizeWhenHidden(true);
+  divider->setSizePolicy(policy);
+  divider->hide();
+  outer->addWidget(divider);
 
   auto* scroll = new QScrollArea;
   scroll->setWidgetResizable(true);
   scroll->setFrameShape(QFrame::NoFrame);
   outer->addWidget(scroll);
+  connect(scroll->verticalScrollBar(), &QScrollBar::valueChanged, divider,
+          [divider](int value) { divider->setVisible(value > 0); });
 
   auto* content = new QWidget;
   content->setObjectName("scrollContent");
   scroll->setWidget(content);
 
   auto* layout = new QVBoxLayout(content);
-  layout->setContentsMargins(28, 24, 28, 20);
+  layout->setContentsMargins(28, 4, 28, 20);
   layout->setSpacing(16);
-
-  layout->addWidget(InitHeader());
 
   auto* files_row = new QHBoxLayout;
   files_row->setSpacing(16);
@@ -106,7 +119,6 @@ ProcessPage::ProcessPage(QSettings* settings, const FontDatabase* font_db,
 
   layout->addWidget(InitOptionsCard());
   layout->addWidget(InitLibraryStrip());
-  layout->addWidget(InitActionRow());
   layout->addStretch();
 
   settings_->beginGroup("Process");
@@ -129,28 +141,51 @@ ProcessPage::ProcessPage(QSettings* settings, const FontDatabase* font_db,
 QWidget* ProcessPage::InitHeader() {
   auto* header = new QWidget;
   auto* hlayout = new QHBoxLayout(header);
-  hlayout->setContentsMargins(0, 0, 0, 0);
+  hlayout->setContentsMargins(28, 20, 28, 12);
+  hlayout->setSpacing(10);
 
   auto* titles = new QVBoxLayout;
-  titles->setSpacing(2);
+  titles->setSpacing(4);
   titles->addWidget(ui::Label(tr("Process subtitles"), "h1"));
-  titles->addWidget(ui::Label(
-      tr("Drop subtitles or whole folders here. The fonts they use are "
-         "subset and embedded automatically."),
-      "muted"));
+  summary_label_ = ui::Label(QString(), "muted");
+  progress_bar_ = new QProgressBar;
+  progress_bar_->setTextVisible(false);
+  progress_bar_->setFixedWidth(240);
+  progress_bar_->hide();
+  titles->addWidget(summary_label_);
+  titles->addWidget(progress_bar_);
   hlayout->addLayout(titles, 1);
 
-  auto* clear_button = ui::Button(tr("Clear list"));
-  hlayout->addWidget(clear_button, 0, Qt::AlignBottom);
+  open_output_button_ = ui::Button(tr("Open output folder"), QString(), "folder");
+  open_output_button_->hide();
+  check_button_ = ui::Button(tr("Check fonts only"));
+  check_button_->setProperty("tall", true);
+  start_button_ = ui::Button(tr("Start"), "primary", "play");
 
-  connect(clear_button, &QPushButton::clicked, this, [this]() {
+  hlayout->addWidget(open_output_button_);
+  hlayout->addWidget(check_button_);
+  hlayout->addWidget(start_button_);
+
+  connect(open_output_button_, &QPushButton::clicked, this, [this]() {
+    if (!last_output_dir_.isEmpty()) {
+      QDesktopServices::openUrl(QUrl::fromLocalFile(last_output_dir_));
+    }
+  });
+
+  connect(check_button_, &QPushButton::clicked, this, &ProcessPage::CheckAll);
+
+  connect(start_button_, &QPushButton::clicked, this, [this]() {
     if (is_running_) {
+      emit RequestStop();
+      start_button_->setEnabled(false);
+      start_button_->setText(tr("Stopping…"));
       return;
     }
-    files_.clear();
-    RebuildTable();
-    RebuildMissing();
-    RefreshSummary();
+    QStringList inputs;
+    for (const auto& file : files_) {
+      inputs.append(file.path);
+    }
+    Start(inputs);
   });
 
   return header;
@@ -171,8 +206,10 @@ QWidget* ProcessPage::InitFilesCard() {
 
   auto* add_files_button = ui::Button(tr("Add files"), QString(), "plus");
   auto* add_folder_button = ui::Button(tr("Add folder"), QString(), "folder");
+  auto* clear_button = ui::Button(tr("Clear list"));
   hlayout->addWidget(add_files_button);
   hlayout->addWidget(add_folder_button);
+  hlayout->addWidget(clear_button);
   layout->addWidget(header);
   layout->addWidget(ui::Divider());
 
@@ -235,6 +272,16 @@ QWidget* ProcessPage::InitFilesCard() {
       settings_->setValue("Process/LastInputDir", path);
       AddPaths({path});
     }
+  });
+
+  connect(clear_button, &QPushButton::clicked, this, [this]() {
+    if (is_running_) {
+      return;
+    }
+    files_.clear();
+    RebuildTable();
+    RebuildMissing();
+    RefreshSummary();
   });
 
   return card;
@@ -459,58 +506,6 @@ QWidget* ProcessPage::InitLibraryStrip() {
           [this]() { emit RequestShowLibrary(QString()); });
 
   return card;
-}
-
-QWidget* ProcessPage::InitActionRow() {
-  auto* row = new QWidget;
-  auto* hlayout = new QHBoxLayout(row);
-  hlayout->setContentsMargins(0, 0, 0, 0);
-  hlayout->setSpacing(10);
-
-  auto* left = new QVBoxLayout;
-  left->setSpacing(6);
-  summary_label_ = ui::Label(QString(), "muted");
-  progress_bar_ = new QProgressBar;
-  progress_bar_->setTextVisible(false);
-  progress_bar_->setFixedWidth(240);
-  progress_bar_->hide();
-  left->addWidget(summary_label_);
-  left->addWidget(progress_bar_);
-  hlayout->addLayout(left, 1);
-
-  open_output_button_ = ui::Button(tr("Open output folder"), QString(), "folder");
-  open_output_button_->hide();
-  check_button_ = ui::Button(tr("Check fonts only"));
-  check_button_->setMinimumHeight(38);
-  start_button_ = ui::Button(tr("Start"), "primary", "play");
-
-  hlayout->addWidget(open_output_button_);
-  hlayout->addWidget(check_button_);
-  hlayout->addWidget(start_button_);
-
-  connect(open_output_button_, &QPushButton::clicked, this, [this]() {
-    if (!last_output_dir_.isEmpty()) {
-      QDesktopServices::openUrl(QUrl::fromLocalFile(last_output_dir_));
-    }
-  });
-
-  connect(check_button_, &QPushButton::clicked, this, &ProcessPage::CheckAll);
-
-  connect(start_button_, &QPushButton::clicked, this, [this]() {
-    if (is_running_) {
-      emit RequestStop();
-      start_button_->setEnabled(false);
-      start_button_->setText(tr("Stopping…"));
-      return;
-    }
-    QStringList inputs;
-    for (const auto& file : files_) {
-      inputs.append(file.path);
-    }
-    Start(inputs);
-  });
-
-  return row;
 }
 
 void ProcessPage::AddPaths(const QStringList& paths) {

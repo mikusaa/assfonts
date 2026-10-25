@@ -179,7 +179,6 @@ class ProcessPage : public QWidget {
   QWidget* InitMissingCard();
   QWidget* InitOptionsCard();
   QWidget* InitLibraryStrip();
-  QWidget* InitActionRow();
 
   int IndexOf(const QString& path) const;
   QString OutputDirFor(const QString& input) const;
